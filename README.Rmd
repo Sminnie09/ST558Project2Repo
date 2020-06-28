@@ -43,12 +43,12 @@ weekdayDataTest <- weekdayData[test, ]
 ```{r repeated cv bag tree, echo = TRUE, message = FALSE}
 library(caret)
 
-set.seed(1)
-trCtrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+#set.seed(1)
+#trCtrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
-bag_fit <- train(shares ~ , data = newsDataTrain, method = "treebag", 
-trControl = trCtrl, preProcess = c("center", "scale"))
+#bag_fit <- train(shares ~ , data = newsDataTrain, method = "treebag", 
+#trControl = trCtrl, preProcess = c("center", "scale"))
 
-bag_fit
+#bag_fit
 ```
 
