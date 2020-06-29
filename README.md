@@ -5,7 +5,9 @@ July 3, 2020
 
   - [Introduction](#introduction)
   - [Online News Popularity Data](#online-news-popularity-data)
+  - [Summary Statistics](#summary-statistics)
   - [Modeling](#modeling)
+      - [Ensemble Model: Bagged Tree](#ensemble-model-bagged-tree)
 
 Project Objective: The goal is to create models for predicting the
 `shares` variable from the dataset. You will create two models: a linear
@@ -39,7 +41,11 @@ weekdayDataTrain <- weekdayData[train, ]
 weekdayDataTest <- weekdayData[test, ]
 ```
 
+# Summary Statistics
+
 # Modeling
+
+## Ensemble Model: Bagged Tree
 
 ``` r
 library(caret)

@@ -38,7 +38,11 @@ weekdayDataTrain <- weekdayData[train, ]
 weekdayDataTest <- weekdayData[test, ]
 ```
 
+# Summary Statistics
+
 # Modeling
+
+## Ensemble Model: Bagged Tree
 
 ```{r repeated cv bag tree, echo = TRUE, message = FALSE}
 library(caret)
@@ -50,5 +54,20 @@ library(caret)
 #trControl = trCtrl, preProcess = c("center", "scale"))
 
 #bag_fit
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r rmarkdown automation, echo = FALSE}
+#rmarkdown::render("S:/ST558/Homeworks/Project 2/ST558 Project 2/README.Rmd", 
+ #                 output_file = "monday.md", params = list(weekday = "monday"))
 ```
 
