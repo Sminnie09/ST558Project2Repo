@@ -28,6 +28,29 @@ day <- paste0('weekday_is_', params$weekday)
 weekdayData <- newsData %>% filter(!!as.name(day) == "1")
 ```
 
+```{r binary classification, echo = TRUE, warning = FALSE}
+
+#initialize column for shares groups
+weekdayData$shares_group <- NA
+
+#split shares into 2 groups
+for (i in 1:length(weekdayData$shares)){
+  
+  if(weekdayData$shares[i] < 1400){
+    weekdayData$shares_group[i] <- "below 1400"
+  }
+  
+  else{
+    weekdayData$shares_group[i] <- "above 1400"
+  }
+}
+
+#factor share groups
+weekdayData$shares_group <- as.factor(weekdayData$shares_group)
+
+```
+
+
 ```{r train/test data sets, echo = TRUE}
 
 #Create test/train data sets from filtered data set
@@ -44,20 +67,45 @@ weekdayDataTest <- weekdayData[test, ]
 
 ## Ensemble Model: Bagged Tree
 
+
 ```{r repeated cv bag tree, echo = TRUE, message = FALSE}
 library(caret)
 
-#set.seed(1)
-#trCtrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+set.seed(1)
+trCtrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
-#bag_fit <- train(shares ~ , data = newsDataTrain, method = "treebag", 
-#trControl = trCtrl, preProcess = c("center", "scale"))
+bag_fit <- train(shares_group ~ num_keywords + avg_positive_polarity + num_videos + num_imgs, 
+                 data = weekdayDataTrain, method = "treebag", trControl = trCtrl, 
+                 preProcess = c("center", "scale"))
 
-#bag_fit
+bag_fit
 ```
 
+```{r predict bagged fit, echo = TRUE}
+bag_pred <- predict(bag_fit, newdata = weekdayDataTest)
 
+head(bag_pred)
+```
 
+```{r bag fit info, echo = TRUE}
+bag_fitInfo <- tbl_df(data.frame(bag_pred, weekdayDataTest$shares_group, weekdayDataTest$num_keywords, 
+                                weekdayDataTest$avg_positive_polarity,
+                                 weekdayDataTest$num_videos, weekdayDataTest$num_imgs))
+
+bag_fitInfo
+```
+
+```{r bag table, echo = TRUE}
+bag_tbl <- table(bag_fitInfo$bag_pred, bag_fitInfo$weekdayDataTest.shares_group)
+
+bag_tbl
+```
+
+```{r misclassification rate, echo = TRUE}
+bag_misClass <- 1 - sum(diag(bag_tbl))/sum(bag_tbl)
+
+bag_misClass
+```
 
 
 
