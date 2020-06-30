@@ -6,52 +6,92 @@ output:
   rmarkdown::github_document:
     toc: true
 params:
-  weekday: "monday"
+  day:
+    NULL
 ---
 
 Project Objective: The goal is to create models for predicting the `shares` variable from the dataset. You will create two models: a linear regression model and a non-linear model (each of your choice). You will use the parameter functionality of markdown to automatically generate an analysis report for each `weekday_is_*` variable (so you’ll end up with seven total outputted documents).
+
+```{r}
+library(rmarkdown)
+library(tidyverse)
+
+#days of the week
+days <- c("monday", "tuesday")
+#"wednesday", "thursday", "friday", "saturday","sunday")
+
+#create file names
+output_file <- paste0(days, ".md")
+
+#create a list for each day of the week with the day as parameter
+params = lapply(days, FUN = function(x){list(day = x)})
+
+#put into data frame
+reports <- tibble(output_file, params)
+
+#need to use x[[1]] to get at elements since tibble doesn't simplify
+apply(reports, MARGIN = 1, FUN = function(x){
+  render("S:/ST558/Homeworks/Project 2/ST558 Project 2/README.Rmd", 
+         output_file = x[[1]], params = x[[2]])
+})
+```
+
+
 
 # Introduction
 
 # Online News Popularity Data
 
-```{r read in data, echo = TRUE, message = FALSE}
+```{r, echo = TRUE, message = FALSE}
+
+#read in data#
 
 library(tidyverse)
 
 newsData <-read_csv("S:/ST558/Homeworks/Project 2/ST558 Project 2/OnlineNewsPopularity.csv")
+newsData$shares_group <- NA
 
-#paste column name for day of week
-day <- paste0('weekday_is_', params$weekday)
+#ifelse(newsData$shares < 1400, newsData$shares_group == "below 1400" , newsData$shares_group == "above 1400")
 
-#filter for day of week
-weekdayData <- newsData %>% filter(!!as.name(day) == "1")
-```
-
-```{r binary classification, echo = TRUE, warning = FALSE}
-
-#initialize column for shares groups
-weekdayData$shares_group <- NA
 
 #split shares into 2 groups
-for (i in 1:length(weekdayData$shares)){
+for (i in 1:length(newsData$shares)){
   
-  if(weekdayData$shares[i] < 1400){
-    weekdayData$shares_group[i] <- "below 1400"
+  if(newsData$shares[i] < 1400){
+    newsData$shares_group[i] <- "below 1400"
   }
   
-  else{
-    weekdayData$shares_group[i] <- "above 1400"
+  if(newsData$shares[i] >= 1400){
+    newsData$shares_group[i] <- "above 1400"
   }
 }
 
+
+newsData$shares_group <- as.factor(newsData$shares_group)
+
+#paste column name for day of week
+day <- paste0('weekday_is_', params$day)
+
+#filter for day of week
+weekdayData <- filter(newsData, day == "1")
+#weekdayData <- filter(newsData, weekday_is_monday == "1")
+```
+
+```{r , echo = TRUE, warning = FALSE}
+
+#binary classification#
+
+#initialize column for shares groups
+
+
+
 #factor share groups
-weekdayData$shares_group <- as.factor(weekdayData$shares_group)
+
 
 ```
 
 
-```{r train/test data sets, echo = TRUE}
+```{r , echo = TRUE}
 
 #Create test/train data sets from filtered data set
 set.seed(1)
@@ -68,7 +108,7 @@ weekdayDataTest <- weekdayData[test, ]
 ## Ensemble Model: Bagged Tree
 
 
-```{r repeated cv bag tree, echo = TRUE, message = FALSE}
+```{r , echo = TRUE, message = FALSE}
 library(caret)
 
 set.seed(1)
@@ -81,13 +121,13 @@ bag_fit <- train(shares_group ~ num_keywords + avg_positive_polarity + num_video
 bag_fit
 ```
 
-```{r predict bagged fit, echo = TRUE}
+```{r , echo = TRUE}
 bag_pred <- predict(bag_fit, newdata = weekdayDataTest)
 
 head(bag_pred)
 ```
 
-```{r bag fit info, echo = TRUE}
+```{r , echo = TRUE}
 bag_fitInfo <- tbl_df(data.frame(bag_pred, weekdayDataTest$shares_group, weekdayDataTest$num_keywords, 
                                 weekdayDataTest$avg_positive_polarity,
                                  weekdayDataTest$num_videos, weekdayDataTest$num_imgs))
@@ -95,27 +135,17 @@ bag_fitInfo <- tbl_df(data.frame(bag_pred, weekdayDataTest$shares_group, weekday
 bag_fitInfo
 ```
 
-```{r bag table, echo = TRUE}
+```{r , echo = TRUE}
 bag_tbl <- table(bag_fitInfo$bag_pred, bag_fitInfo$weekdayDataTest.shares_group)
 
 bag_tbl
 ```
 
-```{r misclassification rate, echo = TRUE}
+```{r , echo = TRUE}
 bag_misClass <- 1 - sum(diag(bag_tbl))/sum(bag_tbl)
 
 bag_misClass
 ```
 
 
-
-
-
-
-
-
-```{r rmarkdown automation, echo = FALSE}
-#rmarkdown::render("S:/ST558/Homeworks/Project 2/ST558 Project 2/README.Rmd", 
- #                 output_file = "monday.md", params = list(weekday = "monday"))
-```
 

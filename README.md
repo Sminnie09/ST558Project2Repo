@@ -21,35 +21,47 @@ seven total outputted documents).
 # Online News Popularity Data
 
 ``` r
+#read in data#
+
 library(tidyverse)
 
 newsData <-read_csv("S:/ST558/Homeworks/Project 2/ST558 Project 2/OnlineNewsPopularity.csv")
+newsData$shares_group <- NA
 
-#paste column name for day of week
-day <- paste0('weekday_is_', params$weekday)
+#ifelse(newsData$shares < 1400, newsData$shares_group == "below 1400" , newsData$shares_group == "above 1400")
 
-#filter for day of week
-weekdayData <- newsData %>% filter(!!as.name(day) == "1")
-```
-
-``` r
-#initialize column for shares groups
-weekdayData$shares_group <- NA
 
 #split shares into 2 groups
-for (i in 1:length(weekdayData$shares)){
+for (i in 1:length(newsData$shares)){
   
-  if(weekdayData$shares[i] < 1400){
-    weekdayData$shares_group[i] <- "below 1400"
+  if(newsData$shares[i] < 1400){
+    newsData$shares_group[i] <- "below 1400"
   }
   
-  else{
-    weekdayData$shares_group[i] <- "above 1400"
+  if(newsData$shares[i] >= 1400){
+    newsData$shares_group[i] <- "above 1400"
   }
 }
 
+
+newsData$shares_group <- as.factor(newsData$shares_group)
+
+#paste column name for day of week
+#day <- paste0('weekday_is_', params$day)
+
+#filter for day of week
+#weekdayData <- filter(newsData, day == "1")
+weekdayData <- filter(newsData, weekday_is_monday == "1")
+```
+
+``` r
+#binary classification#
+
+#initialize column for shares groups
+
+
+
 #factor share groups
-weekdayData$shares_group <- as.factor(weekdayData$shares_group)
 ```
 
 ``` r
