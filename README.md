@@ -15,14 +15,14 @@ library(rmarkdown)
 library(tidyverse)
 ```
 
-    ## -- Attaching packages ------------------------------------------------------ tidyverse 1.3.0 --
+    ## -- Attaching packages --------------------------------------------------------------------------------------- tidyverse 1.3.0 --
 
     ## v ggplot2 3.3.0     v purrr   0.3.3
     ## v tibble  3.0.0     v dplyr   0.8.5
     ## v tidyr   1.0.2     v stringr 1.4.0
     ## v readr   1.3.1     v forcats 0.5.0
 
-    ## -- Conflicts --------------------------------------------------------- tidyverse_conflicts() --
+    ## -- Conflicts ------------------------------------------------------------------------------------------ tidyverse_conflicts() --
     ## x dplyr::filter() masks stats::filter()
     ## x dplyr::lag()    masks stats::lag()
 
@@ -82,7 +82,7 @@ newsData$shares_group <- as.factor(newsData$shares_group)
 #day <- paste0('weekday_is_', params$day)
 
 #filter for day of week
-#weekdayData <- filter(newsData, day == "1")
+#weekdayData <- filter(newsData, paste0('weekday_is_', params$day) == "1")
 weekdayData <- filter(newsData, weekday_is_monday == "1")
 ```
 
@@ -109,7 +109,7 @@ trCtrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
 bag_fit <- train(shares_group ~ num_keywords + avg_positive_polarity + num_videos + num_imgs, 
                  data = weekdayDataTrain, method = "treebag", trControl = trCtrl, 
-                 preProcess = c("center", "scale"))
+                 preProcess = c("center", "scale"), na.action = na.pass)
 
 bag_fit
 ```

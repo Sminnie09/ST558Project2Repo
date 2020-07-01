@@ -38,8 +38,6 @@ apply(reports, MARGIN = 1, FUN = function(x){
 
 ```
 
-
-
 # Introduction
 
 # Online News Popularity Data
@@ -73,8 +71,8 @@ newsData$shares_group <- as.factor(newsData$shares_group)
 #day <- paste0('weekday_is_', params$day)
 
 #filter for day of week
-#weekdayData <- filter(newsData, day == "1")
-weekdayData <- filter(newsData, weekday_is_monday == "1")
+weekdayData <- filter(newsData, paste0('weekday_is_', params$day) == "1")
+#weekdayData <- filter(newsData, weekday_is_monday == "1")
 ```
 
 ```{r , echo = TRUE}
@@ -102,7 +100,7 @@ trCtrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
 bag_fit <- train(shares_group ~ num_keywords + avg_positive_polarity + num_videos + num_imgs, 
                  data = weekdayDataTrain, method = "treebag", trControl = trCtrl, 
-                 preProcess = c("center", "scale"))
+                 preProcess = c("center", "scale"), na.action = na.pass)
 
 bag_fit
 ```
