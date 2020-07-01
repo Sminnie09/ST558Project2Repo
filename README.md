@@ -3,52 +3,19 @@ ST558 Project 2
 Noel Hilliard
 July 3, 2020
 
+  - [Introduction](#introduction)
+  - [Online News Popularity Data](#online-news-popularity-data)
+  - [Summary Statistics](#summary-statistics)
+  - [Modeling](#modeling)
+      - [Ensemble Model: Bagged Tree](#ensemble-model-bagged-tree)
+      - [Multiple Linear Regression](#multiple-linear-regression)
+
 Project Objective: The goal is to create models for predicting the
 `shares` variable from the dataset. You will create two models: a linear
 regression model and a non-linear model (each of your choice). You will
 use the parameter functionality of markdown to automatically generate an
 analysis report for each `weekday_is_*` variable (so you’ll end up with
 seven total outputted documents).
-
-``` r
-library(rmarkdown)
-library(tidyverse)
-```
-
-    ## -- Attaching packages --------------------------------------------------------------------------------------- tidyverse 1.3.0 --
-
-    ## v ggplot2 3.3.0     v purrr   0.3.3
-    ## v tibble  3.0.0     v dplyr   0.8.5
-    ## v tidyr   1.0.2     v stringr 1.4.0
-    ## v readr   1.3.1     v forcats 0.5.0
-
-    ## -- Conflicts ------------------------------------------------------------------------------------------ tidyverse_conflicts() --
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
-
-``` r
-#days of the week
-days <- c("monday", "tuesday")
-#"wednesday", "thursday", "friday", "saturday","sunday")
-
-#create file names
-output_file <- paste0(days, ".md")
-
-#create a list for each day of the week with the day as parameter
-params = lapply(days, FUN = function(x){list(day = x)})
-
-
-#put into data frame
-reports <- tibble(output_file, params)
-```
-
-``` r
-#need to use x[[1]] to get at elements since tibble doesn't simplify
-apply(reports, MARGIN = 1, FUN = function(x){
-  render("README.Rmd", 
-         output_file = x[[1]], params = x[[2]])
-})
-```
 
 # Introduction
 
@@ -62,28 +29,25 @@ library(tidyverse)
 newsData <-read_csv("S:/ST558/Homeworks/Project 2/ST558 Project 2/OnlineNewsPopularity.csv")
 newsData$shares_group <- NA
 
+#paste column name for day of week
+#filter for day of week
+weekdayData <- filter(newsData, newsData[[params$day]] == "1")
+#weekdayData <- filter(newsData, weekday_is_monday == "1")
 
 #split shares into 2 groups
-for (i in 1:length(newsData$shares)){
+for (i in 1:length(weekdayData$shares)){
   
-  if(newsData$shares[i] < 1400){
-    newsData$shares_group[i] <- "below 1400"
+  if(weekdayData$shares[i] < 1400){
+    weekdayData$shares_group[i] <- "below 1400"
   }
   
-  if(newsData$shares[i] >= 1400){
-    newsData$shares_group[i] <- "above 1400"
+  if(weekdayData$shares[i] >= 1400){
+    weekdayData$shares_group[i] <- "above 1400"
   }
 }
 
 
-newsData$shares_group <- as.factor(newsData$shares_group)
-
-#paste column name for day of week
-#day <- paste0('weekday_is_', params$day)
-
-#filter for day of week
-#weekdayData <- filter(newsData, paste0('weekday_is_', params$day) == "1")
-weekdayData <- filter(newsData, weekday_is_monday == "1")
+weekdayData$shares_group <- as.factor(weekdayData$shares_group)
 ```
 
 ``` r

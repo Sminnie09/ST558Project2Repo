@@ -3,40 +3,13 @@ title: "ST558 Project 2"
 author: "Noel Hilliard"
 date: "July 3, 2020"
 output:
-  rmarkdown::github_document
+  rmarkdown::github_document:
+    toc: TRUE
+params: 
+    day: "weekday_is_monday"
 ---
 
 Project Objective: The goal is to create models for predicting the `shares` variable from the dataset. You will create two models: a linear regression model and a non-linear model (each of your choice). You will use the parameter functionality of markdown to automatically generate an analysis report for each `weekday_is_*` variable (so you’ll end up with seven total outputted documents).
-
-```{r eval = TRUE}
-library(rmarkdown)
-library(tidyverse)
-
-#days of the week
-days <- c("monday", "tuesday")
-#"wednesday", "thursday", "friday", "saturday","sunday")
-
-#create file names
-output_file <- paste0(days, ".md")
-
-#create a list for each day of the week with the day as parameter
-params = lapply(days, FUN = function(x){list(day = x)})
-
-
-#put into data frame
-reports <- tibble(output_file, params)
-
-```
-
-
-```{r eval = FALSE}
-#need to use x[[1]] to get at elements since tibble doesn't simplify
-apply(reports, MARGIN = 1, FUN = function(x){
-  render("README.Rmd", 
-         output_file = x[[1]], params = x[[2]])
-})
-
-```
 
 # Introduction
 
@@ -51,28 +24,29 @@ library(tidyverse)
 newsData <-read_csv("S:/ST558/Homeworks/Project 2/ST558 Project 2/OnlineNewsPopularity.csv")
 newsData$shares_group <- NA
 
+#paste column name for day of week
+#filter for day of week
+weekdayData <- filter(newsData, newsData[[params$day]] == "1")
+#weekdayData <- filter(newsData, weekday_is_monday == "1")
 
 #split shares into 2 groups
-for (i in 1:length(newsData$shares)){
+for (i in 1:length(weekdayData$shares)){
   
-  if(newsData$shares[i] < 1400){
-    newsData$shares_group[i] <- "below 1400"
+  if(weekdayData$shares[i] < 1400){
+    weekdayData$shares_group[i] <- "below 1400"
   }
   
-  if(newsData$shares[i] >= 1400){
-    newsData$shares_group[i] <- "above 1400"
+  if(weekdayData$shares[i] >= 1400){
+    weekdayData$shares_group[i] <- "above 1400"
   }
 }
 
 
-newsData$shares_group <- as.factor(newsData$shares_group)
+weekdayData$shares_group <- as.factor(weekdayData$shares_group)
 
-#paste column name for day of week
-#day <- paste0('weekday_is_', params$day)
 
-#filter for day of week
-weekdayData <- filter(newsData, paste0('weekday_is_', params$day) == "1")
-#weekdayData <- filter(newsData, weekday_is_monday == "1")
+
+
 ```
 
 ```{r , echo = TRUE}
