@@ -3,18 +3,52 @@ ST558 Project 2
 Noel Hilliard
 July 3, 2020
 
-  - [Introduction](#introduction)
-  - [Online News Popularity Data](#online-news-popularity-data)
-  - [Summary Statistics](#summary-statistics)
-  - [Modeling](#modeling)
-      - [Ensemble Model: Bagged Tree](#ensemble-model-bagged-tree)
-
 Project Objective: The goal is to create models for predicting the
 `shares` variable from the dataset. You will create two models: a linear
 regression model and a non-linear model (each of your choice). You will
 use the parameter functionality of markdown to automatically generate an
 analysis report for each `weekday_is_*` variable (so you’ll end up with
 seven total outputted documents).
+
+``` r
+library(rmarkdown)
+library(tidyverse)
+```
+
+    ## -- Attaching packages ------------------------------------------------------ tidyverse 1.3.0 --
+
+    ## v ggplot2 3.3.0     v purrr   0.3.3
+    ## v tibble  3.0.0     v dplyr   0.8.5
+    ## v tidyr   1.0.2     v stringr 1.4.0
+    ## v readr   1.3.1     v forcats 0.5.0
+
+    ## -- Conflicts --------------------------------------------------------- tidyverse_conflicts() --
+    ## x dplyr::filter() masks stats::filter()
+    ## x dplyr::lag()    masks stats::lag()
+
+``` r
+#days of the week
+days <- c("monday", "tuesday")
+#"wednesday", "thursday", "friday", "saturday","sunday")
+
+#create file names
+output_file <- paste0(days, ".md")
+
+#create a list for each day of the week with the day as parameter
+params = lapply(days, FUN = function(x){list(day = x)})
+
+
+#put into data frame
+reports <- tibble(output_file, params)
+```
+
+``` r
+#need to use x[[1]] to get at elements since tibble doesn't simplify
+apply(reports, MARGIN = 1, FUN = function(x){
+  render("README.Rmd", 
+         output_file = x[[1]], params = x[[2]])
+})
+```
 
 # Introduction
 
@@ -27,8 +61,6 @@ library(tidyverse)
 
 newsData <-read_csv("S:/ST558/Homeworks/Project 2/ST558 Project 2/OnlineNewsPopularity.csv")
 newsData$shares_group <- NA
-
-#ifelse(newsData$shares < 1400, newsData$shares_group == "below 1400" , newsData$shares_group == "above 1400")
 
 
 #split shares into 2 groups
@@ -52,16 +84,6 @@ newsData$shares_group <- as.factor(newsData$shares_group)
 #filter for day of week
 #weekdayData <- filter(newsData, day == "1")
 weekdayData <- filter(newsData, weekday_is_monday == "1")
-```
-
-``` r
-#binary classification#
-
-#initialize column for shares groups
-
-
-
-#factor share groups
 ```
 
 ``` r
@@ -156,3 +178,59 @@ bag_misClass
 ```
 
     ## [1] 0.4847424
+
+## Multiple Linear Regression
+
+``` r
+mlrFit1 <- lm(shares ~ num_keywords + avg_positive_polarity + 
+                num_videos + num_imgs, data = weekdayDataTrain)
+
+mlrFit2 <- lm(shares ~ max_positive_polarity + title_subjectivity, 
+              data = weekdayDataTrain)
+
+mlrFit3 <- lm(shares ~ num_keywords + rate_negative_words,
+              data = weekdayDataTrain)
+
+mlrFit4 <- lm(shares ~ n_unique_tokens +  average_token_length + 
+                 global_rate_positive_words, data = weekdayDataTrain)
+```
+
+``` r
+library(MuMIn)
+
+compareFitStats <- function(mlrFit1, mlrFit2, mlrFit3, mlrFit4){
+  fitStats <- data.frame(fitStat = c("Adj R Square", "AIC", "BIC"),
+  col1 = c(round(summary(mlrFit1)$adj.r.squared, 5), AIC(mlrFit1),
+                 BIC(mlrFit1)),
+  col2 = c(round(summary(mlrFit2)$adj.r.squared, 5), AIC(mlrFit2),
+                 BIC(mlrFit2)),
+  col3 = c(round(summary(mlrFit3)$adj.r.squared, 5), AIC(mlrFit3),
+                BIC(mlrFit3)),
+  col4 = c(round(summary(mlrFit4)$adj.r.squared, 5), AIC(mlrFit4),
+                BIC(mlrFit4)))
+  
+  #put names in data frame
+  calls <- as.list(match.call())
+  calls[[1]] <- NULL
+  names(fitStats[2:5]) <- unlist(calls)
+  fitStats
+}
+```
+
+``` r
+fitStats <- compareFitStats(mlrFit1, mlrFit2, mlrFit3, mlrFit4)
+```
+
+``` r
+mlrFit1_pred <- predict(mlrFit1, newdata = weekdayDataTest)
+RMSE(weekdayDataTest$shares, mlrFit1_pred)
+```
+
+    ## [1] 17559.41
+
+``` r
+mlrFit4_pred <- predict(mlrFit4, newdata = weekdayDataTest)
+RMSE(weekdayDataTest$shares, mlrFit4_pred)
+```
+
+    ## [1] 17577.04
