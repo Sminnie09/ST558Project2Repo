@@ -1,33 +1,72 @@
 ---
-title: "ST558 Project 2"
+title: "ST558 Project 2" 
 author: "Noel Hilliard"
 date: "July 3, 2020"
 output:
   rmarkdown::github_document:
     toc: TRUE
 params: 
-    day: "weekday_is_monday"
+    day: "monday"
 ---
 
 Project Objective: The goal is to create models for predicting the `shares` variable from the dataset. You will create two models: a linear regression model and a non-linear model (each of your choice). You will use the parameter functionality of markdown to automatically generate an analysis report for each `weekday_is_*` variable (so you’ll end up with seven total outputted documents).
 
-# Introduction
 
-# Online News Popularity Data
-
-```{r, echo = TRUE, message = FALSE}
-
-#read in data#
-
+```{r libraries, echo = TRUE, message = FALSE}
+library(ggplot2)
+library(Hmisc)
+library(rmarkdown)
 library(tidyverse)
+library(corrplot)
+library(knitr)
+library(caret)
 
+```
+
+
+
+
+```{r rmarkdown params, eval = FALSE, echo = FALSE}
+
+#days of the week
+days <- c("monday", "tuesday")
+
+#days <- c("monday", "tuesday", "wednesday",
+           #"thursday", "friday", "aturday",
+           #"sunday")
+
+#create file names
+output_file <- paste0(days, "Analysis.md")
+
+#create a list for each day of the week with the day as parameter
+params <- lapply(days, FUN = function(x){list(day = x)})
+
+#put into data frame
+#reports <- tibble(days, filename = output_file, params = purrr::map(days, ~list(day = .)))
+reports <- tibble(filename = output_file, params)
+```
+
+```{r rmarkdown automation, eval = FALSE, echo = FALSE}
+apply(reports, MARGIN = 1, FUN = function(x){
+  render("README.Rmd", 
+         output_file = x[[1]], params = x[[2]])
+})
+```
+
+
+# Introduction Online News Popularity Data
+
+# `r capitalize(params$day)` Data
+
+```{r read/filter data, echo = TRUE, message = FALSE}
+
+#read in data
 newsData <-read_csv("S:/ST558/Homeworks/Project 2/ST558 Project 2/OnlineNewsPopularity.csv")
 newsData$shares_group <- NA
 
-#paste column name for day of week
 #filter for day of week
-weekdayData <- filter(newsData, newsData[[params$day]] == "1")
-#weekdayData <- filter(newsData, weekday_is_monday == "1")
+weekdayData <- filter(newsData, newsData[[paste0("weekday_is_",params$day)]] == "1")
+
 
 #split shares into 2 groups
 for (i in 1:length(weekdayData$shares)){
@@ -41,15 +80,11 @@ for (i in 1:length(weekdayData$shares)){
   }
 }
 
-
 weekdayData$shares_group <- as.factor(weekdayData$shares_group)
-
-
-
 
 ```
 
-```{r , echo = TRUE}
+```{r train/test data, echo = TRUE}
 
 #Create test/train data sets from filtered data set
 set.seed(1)
@@ -61,13 +96,58 @@ weekdayDataTest <- weekdayData[test, ]
 
 # Summary Statistics
 
+```{r histogram, echo = TRUE}
+g <- ggplot(weekdayDataTrain, aes(x = shares))
+g + geom_histogram(bins = 100)
+```
+
+```{r bar plot, echo = TRUE}
+
+g <- ggplot(data = weekdayDataTrain, aes(x = shares_group))
+g + geom_bar() + labs(x = "Shares Group", title = (paste0(capitalize(params$day)," Shares Groups")))
+```
+
+```{r shares_group count, echo = TRUE}
+table(weekdayDataTrain$shares_group)
+```
+
+```{r TrainData stat summary, echo = TRUE}
+
+TrainStatSum <- function(group){
+  data <- weekdayDataTrain %>% filter(shares_group == group) %>% 
+    select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
+           max_positive_polarity, title_subjectivity, rate_negative_words,
+           n_unique_tokens, average_token_length, global_rate_positive_words)
+           kable(apply(data, 2, summary, col.names = c("num_keywords", 
+           "avg_positive_polarity", "num_videos", "num_imgs", "max_positive_polarity", 
+           "title_subjectivity", "rate_negative_words", "n_unique_tokens", "average_token_length",
+           "global_rate_positive_words")))
+}
+
+```
+
+```{r above 1400, echo = TRUE}
+TrainStatSum("above 1400")
+```
+
+```{r below 1400, echo = TRUE}
+TrainStatSum("below 1400")
+```
+
+```{r correlation, echo = TRUE}
+correlation <- cor(weekdayDataTrain %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
+           max_positive_polarity, title_subjectivity, rate_negative_words,
+           n_unique_tokens, average_token_length, global_rate_positive_words), method = "spearman")
+
+corrplot(correlation, type = "upper", tl.pos = "lt")
+```
+
+
 # Modeling
 
 ## Ensemble Model: Bagged Tree
 
-
-```{r , echo = TRUE, message = FALSE}
-library(caret)
+```{r bagged tree , echo = TRUE, message = FALSE}
 
 set.seed(1)
 trCtrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
@@ -79,13 +159,13 @@ bag_fit <- train(shares_group ~ num_keywords + avg_positive_polarity + num_video
 bag_fit
 ```
 
-```{r , echo = TRUE}
+```{r predict bag tree , echo = TRUE}
 bag_pred <- predict(bag_fit, newdata = weekdayDataTest)
 
 head(bag_pred)
 ```
 
-```{r , echo = TRUE}
+```{r bag fit info , echo = TRUE}
 bag_fitInfo <- tbl_df(data.frame(bag_pred, weekdayDataTest$shares_group, weekdayDataTest$num_keywords, 
                                 weekdayDataTest$avg_positive_polarity,
                                  weekdayDataTest$num_videos, weekdayDataTest$num_imgs))
@@ -93,21 +173,21 @@ bag_fitInfo <- tbl_df(data.frame(bag_pred, weekdayDataTest$shares_group, weekday
 bag_fitInfo
 ```
 
-```{r , echo = TRUE}
+```{r bag table , echo = TRUE}
 bag_tbl <- table(bag_fitInfo$bag_pred, bag_fitInfo$weekdayDataTest.shares_group)
 
 bag_tbl
 ```
 
-```{r , echo = TRUE}
+```{r bag misclass, echo = TRUE}
 bag_misClass <- 1 - sum(diag(bag_tbl))/sum(bag_tbl)
 
 bag_misClass
 ```
 
-## Multiple Linear Regression
+## Select Best Multiple Linear Regression Model
 
-```{r}
+```{r mlr, echo = TRUE}
 mlrFit1 <- lm(shares ~ num_keywords + avg_positive_polarity + 
                 num_videos + num_imgs, data = weekdayDataTrain)
 
@@ -117,12 +197,12 @@ mlrFit2 <- lm(shares ~ max_positive_polarity + title_subjectivity,
 mlrFit3 <- lm(shares ~ num_keywords + rate_negative_words,
               data = weekdayDataTrain)
 
-mlrFit4 <- lm(shares ~ n_unique_tokens +  average_token_length + 
+mlrFit4 <- lm(shares ~ n_unique_tokens + average_token_length + 
                  global_rate_positive_words, data = weekdayDataTrain)
 
 ```
 
-```{r}
+```{r compare fit, echo = TRUE}
 
 library(MuMIn)
 
@@ -145,11 +225,11 @@ compareFitStats <- function(mlrFit1, mlrFit2, mlrFit3, mlrFit4){
 }
 ```
 
-```{r}
+```{r fit stats, echo = TRUE}
 fitStats <- compareFitStats(mlrFit1, mlrFit2, mlrFit3, mlrFit4)
 ```
 
-```{r}
+```{r compare rmse, echo = TRUE}
 mlrFit1_pred <- predict(mlrFit1, newdata = weekdayDataTest)
 RMSE(weekdayDataTest$shares, mlrFit1_pred)
 

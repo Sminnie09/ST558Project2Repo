@@ -3,8 +3,9 @@ ST558 Project 2
 Noel Hilliard
 July 3, 2020
 
-  - [Introduction](#introduction)
-  - [Online News Popularity Data](#online-news-popularity-data)
+  - [Introduction Online News Popularity
+    Data](#introduction-online-news-popularity-data)
+  - [Monday Data](#monday-data)
   - [Summary Statistics](#summary-statistics)
   - [Modeling](#modeling)
       - [Ensemble Model: Bagged Tree](#ensemble-model-bagged-tree)
@@ -17,22 +18,26 @@ use the parameter functionality of markdown to automatically generate an
 analysis report for each `weekday_is_*` variable (so you’ll end up with
 seven total outputted documents).
 
-# Introduction
+``` r
+library(ggplot2)
+library(Hmisc)
+library(rmarkdown)
+library(tidyverse)
+library(corrplot)
+```
 
-# Online News Popularity Data
+# Introduction Online News Popularity Data
+
+# Monday Data
 
 ``` r
-#read in data#
-
-library(tidyverse)
-
+#read in data
 newsData <-read_csv("S:/ST558/Homeworks/Project 2/ST558 Project 2/OnlineNewsPopularity.csv")
 newsData$shares_group <- NA
 
-#paste column name for day of week
 #filter for day of week
-weekdayData <- filter(newsData, newsData[[params$day]] == "1")
-#weekdayData <- filter(newsData, weekday_is_monday == "1")
+weekdayData <- filter(newsData, newsData[[paste0("weekday_is_",params$day)]] == "1")
+
 
 #split shares into 2 groups
 for (i in 1:length(weekdayData$shares)){
@@ -45,7 +50,6 @@ for (i in 1:length(weekdayData$shares)){
     weekdayData$shares_group[i] <- "above 1400"
   }
 }
-
 
 weekdayData$shares_group <- as.factor(weekdayData$shares_group)
 ```
@@ -60,6 +64,79 @@ weekdayDataTest <- weekdayData[test, ]
 ```
 
 # Summary Statistics
+
+``` r
+g <- ggplot(weekdayDataTrain, aes(x = shares))
+g + geom_histogram(bins = 100)
+```
+
+![](README_files/figure-gfm/histogram-1.png)<!-- -->
+
+``` r
+g <- ggplot(data = weekdayDataTrain, aes(x = shares_group))
+g + geom_bar() + labs(x = "Shares Group", title = (paste0(capitalize(params$day)," Shares Groups")))
+```
+
+![](README_files/figure-gfm/bar%20plot-1.png)<!-- -->
+
+``` r
+table(weekdayDataTrain$shares_group)
+```
+
+    ## 
+    ## above 1400 below 1400 
+    ##       2365       2297
+
+``` r
+library(knitr)
+
+TrainStatSum <- function(group){
+  data <- weekdayDataTrain %>% filter(shares_group == group) %>% 
+    select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
+           max_positive_polarity, title_subjectivity, rate_negative_words,
+           n_unique_tokens, average_token_length, global_rate_positive_words)
+           kable(apply(data, 2, summary, col.names = c("num_keywords", 
+           "avg_positive_polarity", "num_videos", "num_imgs", "max_positive_polarity", 
+           "title_subjectivity", "rate_negative_words", "n_unique_tokens", "average_token_length",
+           "global_rate_positive_words")))
+}
+```
+
+``` r
+TrainStatSum("above 1400")
+```
+
+|         | num\_keywords | avg\_positive\_polarity | num\_videos | num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
+| ------- | ------------: | ----------------------: | ----------: | --------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
+| Min.    |       2.00000 |               0.0000000 |    0.000000 |  0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
+| 1st Qu. |       6.00000 |               0.3060905 |    0.000000 |  1.000000 |               0.6000000 |           0.0000000 |             0.1764706 |         0.4689119 |               4.475000 |                     0.0294118 |
+| Median  |       7.00000 |               0.3604167 |    0.000000 |  1.000000 |               0.8000000 |           0.1500000 |             0.2692308 |         0.5442804 |               4.648230 |                     0.0393228 |
+| Mean    |       7.27907 |               0.3537985 |    1.380127 |  4.673573 |               0.7582498 |           0.2890607 |             0.2785470 |         0.5264764 |               4.506621 |                     0.0397244 |
+| 3rd Qu. |       9.00000 |               0.4121212 |    1.000000 |  5.000000 |               1.0000000 |           0.5000000 |             0.3684211 |         0.6075949 |               4.830467 |                     0.0503979 |
+| Max.    |      10.00000 |               0.8666667 |   74.000000 | 93.000000 |               1.0000000 |           1.0000000 |             1.0000000 |         0.9000000 |               5.971660 |                     0.1194539 |
+
+``` r
+TrainStatSum("below 1400")
+```
+
+|         | num\_keywords | avg\_positive\_polarity | num\_videos | num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
+| ------- | ------------: | ----------------------: | ----------: | --------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
+| Min.    |      1.000000 |               0.0000000 |    0.000000 |  0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
+| 1st Qu. |      6.000000 |               0.3038841 |    0.000000 |  1.000000 |               0.6000000 |           0.0000000 |             0.2000000 |         0.4783505 |               4.476431 |                     0.0271186 |
+| Median  |      7.000000 |               0.3565605 |    0.000000 |  1.000000 |               0.8000000 |           0.1000000 |             0.3000000 |         0.5413712 |               4.663551 |                     0.0373057 |
+| Mean    |      7.023509 |               0.3542173 |    1.353505 |  4.081846 |               0.7557345 |           0.2646893 |             0.3037970 |         0.5353332 |               4.565993 |                     0.0382616 |
+| 3rd Qu. |      8.000000 |               0.4121212 |    1.000000 |  2.000000 |               1.0000000 |           0.5000000 |             0.4029851 |         0.6100796 |               4.852632 |                     0.0487805 |
+| Max.    |     10.000000 |               1.0000000 |   50.000000 | 91.000000 |               1.0000000 |           1.0000000 |             0.9402985 |         1.0000000 |               6.512690 |                     0.1213873 |
+
+``` r
+correlation <- cor(weekdayDataTrain %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
+           max_positive_polarity, title_subjectivity, rate_negative_words,
+           n_unique_tokens, average_token_length, global_rate_positive_words), method = "spearman")
+
+corrplot(correlation, type = "upper", tl.pos = "lt")
+```
+
+![](README_files/figure-gfm/correlation-1.png)<!-- -->
 
 # Modeling
 
@@ -155,7 +232,7 @@ mlrFit2 <- lm(shares ~ max_positive_polarity + title_subjectivity,
 mlrFit3 <- lm(shares ~ num_keywords + rate_negative_words,
               data = weekdayDataTrain)
 
-mlrFit4 <- lm(shares ~ n_unique_tokens +  average_token_length + 
+mlrFit4 <- lm(shares ~ n_unique_tokens + average_token_length + 
                  global_rate_positive_words, data = weekdayDataTrain)
 ```
 
