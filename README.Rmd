@@ -5,12 +5,45 @@ date: "July 3, 2020"
 output:
   rmarkdown::github_document:
     toc: TRUE
-params: 
-    day: "monday"
 ---
 
 Project Objective: The goal is to create models for predicting the `shares` variable from the dataset. You will create two models: a linear regression model and a non-linear model (each of your choice). You will use the parameter functionality of markdown to automatically generate an analysis report for each `weekday_is_*` variable (so you’ll end up with seven total outputted documents).
 
+```{r rmarkdown params, echo = FALSE, eval = TRUE, message = FALSE}
+library(rmarkdown)
+library(tidyverse)
+library(Hmisc)
+
+#days of the week
+days <- c("monday", "tuesday", "wednesday")
+
+#days <- c("monday", "tuesday", "wednesday",
+           #"thursday", "friday", "aturday",
+           #"sunday")
+
+#create file names
+output_file <- paste0(capitalize(days), "Analysis.md")
+
+#create a list for each day of the week with the day as parameter
+params <- lapply(days, FUN = function(x){list(day = x)})
+
+#put into data frame
+#reports <- tibble(days, filename = output_file, params = purrr::map(days, ~list(day = .)))
+reports <- tibble(filename = output_file, params)
+```
+
+```{r rmarkdown automation, eval = TRUE, echo = FALSE}
+apply(reports, MARGIN = 1, FUN = function(x){
+  render("template.Rmd", 
+         output_file = x[[1]], params = x[[2]])
+})
+```
+
+# Introduction Online News Popularity Data
+
+The data used for this analysis was obtained from the [UCI Machine Learning Reposititory](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity). The data set summarizes a set of features about articles published by Mashable over a two year period. The purpose of this analysis is to predict the number of shares in social networks using select features from the data set. Two types of methods will be used to predict the `shares`. The first model discussed is a bagged tree model. For this analysis, the `shares` were divided into two groups (< 1400 and >= 1400) to create a binary classification problem. The second model discussed is a multiple linear regression model. Both types of models were trained/tuned using the training data set and then then predictions were made using the test data set.
+
+The following libraries are loaded for the analysis.
 
 ```{r libraries, echo = TRUE, message = FALSE}
 library(ggplot2)
@@ -23,40 +56,9 @@ library(caret)
 
 ```
 
+# `r params$day` Data
 
-
-
-```{r rmarkdown params, eval = FALSE, echo = FALSE}
-
-#days of the week
-days <- c("monday", "tuesday")
-
-#days <- c("monday", "tuesday", "wednesday",
-           #"thursday", "friday", "aturday",
-           #"sunday")
-
-#create file names
-output_file <- paste0(days, "Analysis.md")
-
-#create a list for each day of the week with the day as parameter
-params <- lapply(days, FUN = function(x){list(day = x)})
-
-#put into data frame
-#reports <- tibble(days, filename = output_file, params = purrr::map(days, ~list(day = .)))
-reports <- tibble(filename = output_file, params)
-```
-
-```{r rmarkdown automation, eval = FALSE, echo = FALSE}
-apply(reports, MARGIN = 1, FUN = function(x){
-  render("README.Rmd", 
-         output_file = x[[1]], params = x[[2]])
-})
-```
-
-
-# Introduction Online News Popularity Data
-
-# `r capitalize(params$day)` Data
+The full data set contained data for all days of the week. This analysis will focus on the data from `r params$day`. Once the data was filtered for `r params$day`, the `shares` variable was divided into two groups: < 1400 and >= 1400 in preparation for fitting the bagged tree model.
 
 ```{r read/filter data, echo = TRUE, message = FALSE}
 
@@ -83,6 +85,30 @@ for (i in 1:length(weekdayData$shares)){
 weekdayData$shares_group <- as.factor(weekdayData$shares_group)
 
 ```
+
+The following variables were used in this analysis to predict the `shares` variable:
+
+* `num_keywords` : Number of keywords in the metadata
+* `avg_positive_polarity`
+* `num_videos`
+* `num_imgs`
+* `max_postive_polarity`
+* `title_subjectivity`
+* `rate_negative_words`
+* `n_unique_tokens`
+* `average_token_length`
+* `global_rate_positive_words`
+* `shares`
+
+```{r select variables, echo = TRUE}
+
+weekdayData <- weekdayData %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
+           max_positive_polarity, title_subjectivity, rate_negative_words,
+           n_unique_tokens, average_token_length, global_rate_positive_words, shares, shares_group)
+
+head(weekdayData)
+```
+
 
 ```{r train/test data, echo = TRUE}
 

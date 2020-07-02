@@ -9,7 +9,8 @@ July 3, 2020
   - [Summary Statistics](#summary-statistics)
   - [Modeling](#modeling)
       - [Ensemble Model: Bagged Tree](#ensemble-model-bagged-tree)
-      - [Multiple Linear Regression](#multiple-linear-regression)
+      - [Select Best Multiple Linear Regression
+        Model](#select-best-multiple-linear-regression-model)
 
 Project Objective: The goal is to create models for predicting the
 `shares` variable from the dataset. You will create two models: a linear
@@ -18,17 +19,40 @@ use the parameter functionality of markdown to automatically generate an
 analysis report for each `weekday_is_*` variable (so you’ll end up with
 seven total outputted documents).
 
+# Introduction Online News Popularity Data
+
+The data used for this analysis was obtained from the [UCI Machine
+Learning
+Reposititory](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity).
+The data set summarizes a set of features about articles published by
+Mashable over a two year period. The purpose of this analysis is to
+predict the number of shares in social networks using select features
+from the data set. Two types of methods will be used to predict the
+`shares`. The first model discussed is a bagged tree model. For this
+analysis, the `shares` were divided into two groups (\< 1400 and \>=
+1400) to create a binary classification problem. The second model
+discussed is a multiple linear regression model. Both types of models
+were trained/tuned using the training data set and then then predictions
+were made using the test data set.
+
+The following libraries are loaded for the analysis.
+
 ``` r
 library(ggplot2)
 library(Hmisc)
 library(rmarkdown)
 library(tidyverse)
 library(corrplot)
+library(knitr)
+library(caret)
 ```
 
-# Introduction Online News Popularity Data
-
 # Monday Data
+
+The full data set contained data for all days of the week. This analysis
+will focus on the data from monday. Once the data was filtered for
+monday, the `shares` variable was divided into two groups: \< 1400 and
+\>= 1400 in preparation for fitting the bagged tree model.
 
 ``` r
 #read in data
@@ -53,6 +77,45 @@ for (i in 1:length(weekdayData$shares)){
 
 weekdayData$shares_group <- as.factor(weekdayData$shares_group)
 ```
+
+The following variables were used in this analysis to predict the
+`shares` variable:
+
+  - `num_keywords` : Number of keywords in the metadata
+  - `avg_positive_polarity`
+  - `num_videos`
+  - `num_imgs`
+  - `max_postive_polarity`
+  - `title_subjectivity`
+  - `rate_negative_words`
+  - `n_unique_tokens`
+  - `average_token_length`
+  - `global_rate_positive_words`
+  - `shares`
+
+<!-- end list -->
+
+``` r
+weekdayData <- weekdayData %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
+           max_positive_polarity, title_subjectivity, rate_negative_words,
+           n_unique_tokens, average_token_length, global_rate_positive_words, shares, shares_group)
+
+head(weekdayData)
+```
+
+    ## # A tibble: 6 x 12
+    ##   num_keywords avg_positive_po~ num_videos num_imgs max_positive_po~
+    ##          <dbl>            <dbl>      <dbl>    <dbl>            <dbl>
+    ## 1            5            0.379          0        1              0.7
+    ## 2            4            0.287          0        1              0.7
+    ## 3            6            0.496          0        1              1  
+    ## 4            7            0.386          0        1              0.8
+    ## 5            7            0.411          0       20              1  
+    ## 6            9            0.351          0        0              0.6
+    ## # ... with 7 more variables: title_subjectivity <dbl>,
+    ## #   rate_negative_words <dbl>, n_unique_tokens <dbl>,
+    ## #   average_token_length <dbl>, global_rate_positive_words <dbl>, shares <dbl>,
+    ## #   shares_group <fct>
 
 ``` r
 #Create test/train data sets from filtered data set
@@ -88,8 +151,6 @@ table(weekdayDataTrain$shares_group)
     ##       2365       2297
 
 ``` r
-library(knitr)
-
 TrainStatSum <- function(group){
   data <- weekdayDataTrain %>% filter(shares_group == group) %>% 
     select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
@@ -143,8 +204,6 @@ corrplot(correlation, type = "upper", tl.pos = "lt")
 ## Ensemble Model: Bagged Tree
 
 ``` r
-library(caret)
-
 set.seed(1)
 trCtrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
@@ -220,7 +279,7 @@ bag_misClass
 
     ## [1] 0.4847424
 
-## Multiple Linear Regression
+## Select Best Multiple Linear Regression Model
 
 ``` r
 mlrFit1 <- lm(shares ~ num_keywords + avg_positive_polarity + 
