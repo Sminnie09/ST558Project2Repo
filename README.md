@@ -71,8 +71,7 @@ The full data set contained data for all days of the week.
 
   - The analysis for [Tuesday is available here.](TuesdayAnalysis.md)
 
-  - The analysis for [Wednesday is available
-    here.](WednesdayAnalysis.md)
+  - The analysis for [Wednesday is available here.](WednesdayAnalysis.md)
 
   - The analysis for [Thursday is available here.](ThursdayAnalysis.md)
 
