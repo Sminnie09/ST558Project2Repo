@@ -56,7 +56,7 @@ library(caret)
 
 ```
 
-# `r capitalize(params$day)` Data
+# `r params$day` Data
 
 The full data set contained data for all days of the week. This analysis will focus on the data from `r params$day`. Once the data was filtered for `r params$day`, the `shares` variable was divided into two groups: < 1400 and >= 1400 in preparation for fitting the bagged tree model.
 
