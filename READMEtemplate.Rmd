@@ -1,12 +1,19 @@
 ---
-title: "ST558 Project 2" 
-author: "Noel Hilliard"
-date: "July 3, 2020"
 output:
   rmarkdown::github_document:
     toc: TRUE
 params:
   day: "monday"
+author: "Noel Hilliard"
+date: "July 3, 2020"
+---
+
+```{r YAML title, echo = FALSE, message = FALSE}
+library(Hmisc)
+```
+
+---
+title: `r paste0(capitalize(params$day), " Analysis")`
 ---
 
 Project Objective: The goal is to create models for predicting the `shares` variable from the dataset. You will create two models: a linear regression model and a non-linear model (each of your choice). You will use the parameter functionality of markdown to automatically generate an analysis report for each `weekday_is_*` variable (so you’ll end up with seven total outputted documents).
