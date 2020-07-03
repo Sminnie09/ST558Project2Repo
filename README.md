@@ -50,7 +50,7 @@ library(knitr)
 library(caret)
 ```
 
-# `r capitalize(monday)` Data
+# monday Data
 
 The full data set contained data for all days of the week. This analysis
 will focus on the data from monday. Once the data was filtered for
