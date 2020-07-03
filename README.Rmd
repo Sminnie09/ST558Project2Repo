@@ -9,15 +9,18 @@ output:
 
 Project Objective: The goal is to create models for predicting the `shares` variable from the dataset. You will create two models: a linear regression model and a non-linear model (each of your choice). You will use the parameter functionality of markdown to automatically generate an analysis report for each `weekday_is_*` variable (so you’ll end up with seven total outputted documents).
 
-```{r , echo = FALSE, eval = TRUE, message = FALSE}
+The code below was used to create .md files for each day of the week by calling the READMEtemplate.Rmd file in the `rmarkdown::render` function. The `params` variable created a parameter for each day of the week and the `output_file` variable created a file name for each day of the week.
+
+```{r , echo = TRUE, eval = TRUE, message = FALSE}
 library(rmarkdown)
 library(tidyverse)
 library(Hmisc)
 
 #days of the week
-days <- c("monday", "tuesday", "wednesday",
-          "thursday", "friday", "saturday",
-           "sunday")
+days <- c("monday")
+          #"tuesday", "wednesday",
+          #"thursday", "friday", "saturday",
+           #"sunday")
 
 #create file names
 output_file <- paste0(capitalize(days), "Analysis.md")
@@ -30,7 +33,7 @@ params <- lapply(days, FUN = function(x){list(day = x)})
 reports <- tibble(filename = output_file, params)
 ```
 
-```{r , eval = TRUE, echo = FALSE, message = FALSE}
+```{r , echo = TRUE, message = FALSE, results = "hide"}
 apply(reports, MARGIN = 1, FUN = function(x){
   render("READMEtemplate.Rmd", 
          output_file = x[[1]], params = x[[2]])

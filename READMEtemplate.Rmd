@@ -11,36 +11,6 @@ params:
 
 Project Objective: The goal is to create models for predicting the `shares` variable from the dataset. You will create two models: a linear regression model and a non-linear model (each of your choice). You will use the parameter functionality of markdown to automatically generate an analysis report for each `weekday_is_*` variable (so you’ll end up with seven total outputted documents).
 
-```{r rmarkdown params, echo = FALSE, eval = FALSE, message = FALSE}
-library(rmarkdown)
-library(tidyverse)
-library(Hmisc)
-
-#days of the week
-days <- c("monday", "tuesday", "wednesday")
-
-#days <- c("monday", "tuesday", "wednesday",
-           #"thursday", "friday", "aturday",
-           #"sunday")
-
-#create file names
-output_file <- paste0(capitalize(days), "Analysis.md")
-
-#create a list for each day of the week with the day as parameter
-params <- lapply(days, FUN = function(x){list(day = x)})
-
-#put into data frame
-#reports <- tibble(days, filename = output_file, params = purrr::map(days, ~list(day = .)))
-reports <- tibble(filename = output_file, params)
-```
-
-```{r rmarkdown automation, eval = FALSE, echo = FALSE, message = FALSE}
-apply(reports, MARGIN = 1, FUN = function(x){
-  render("READMEtemplate.Rmd", 
-         output_file = x[[1]], params = x[[2]])
-})
-```
-
 # Introduction Online News Popularity Data
 
 The data used for this analysis was obtained from the [UCI Machine Learning Reposititory](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity). The data set summarizes a set of features about articles published by Mashable over a two year period. The purpose of this analysis is to predict the number of shares in social networks using select features from the data set. Two types of methods will be used to predict the `shares`. The first model discussed is a bagged tree model. For this analysis, the `shares` were divided into two groups (< 1400 and >= 1400) to create a binary classification problem. The second model discussed is linear regression. Both types of models were trained/tuned using the training data set and then then predictions were made using the test data set.
