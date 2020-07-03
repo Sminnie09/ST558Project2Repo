@@ -12,8 +12,8 @@ July 3, 2020
       - [Numerical Summary](#numerical-summary)
   - [Modeling](#modeling)
       - [Ensemble Model: Bagged Tree](#ensemble-model-bagged-tree)
-      - [Select Best Multiple Linear Regression
-        Model](#select-best-multiple-linear-regression-model)
+      - [Select Linear Regression
+        Model](#select-linear-regression-model)
 
 Project Objective: The goal is to create models for predicting the
 `shares` variable from the dataset. You will create two models: a linear
@@ -181,69 +181,12 @@ table(weekdayDataTrain$shares_group)
     ## above 1400 below 1400 
     ##       2365       2297
 
-Here a function was used to calculate a numerical summary of the
-training data set for the two `shares` groups. The numerical summary
-includes the maximum, minimum, median, mean, 3rd quartile, and 1st
-quartile. The `summary` function was used to create the table.
-
 ``` r
-TrainStatSum <- function(group){
-  data <- weekdayDataTrain %>% filter(shares_group == group) %>% 
-    select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
-           max_positive_polarity, title_subjectivity, rate_negative_words,
-           n_unique_tokens, average_token_length, global_rate_positive_words)
-           kable(apply(data, 2, summary, col.names = c("num_keywords", 
-           "avg_positive_polarity", "num_videos", "num_imgs", "max_positive_polarity", 
-           "title_subjectivity", "rate_negative_words", "n_unique_tokens", "average_token_length",
-           "global_rate_positive_words")))
-}
+summary(weekdayDataTrain$shares)
 ```
 
-The table below shows the result of the `TrainStatSum` function for the
-`shares` group above 1400.
-
-``` r
-TrainStatSum("above 1400")
-```
-
-|         | num\_keywords | avg\_positive\_polarity | num\_videos | num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
-| ------- | ------------: | ----------------------: | ----------: | --------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
-| Min.    |       2.00000 |               0.0000000 |    0.000000 |  0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
-| 1st Qu. |       6.00000 |               0.3060905 |    0.000000 |  1.000000 |               0.6000000 |           0.0000000 |             0.1764706 |         0.4689119 |               4.475000 |                     0.0294118 |
-| Median  |       7.00000 |               0.3604167 |    0.000000 |  1.000000 |               0.8000000 |           0.1500000 |             0.2692308 |         0.5442804 |               4.648230 |                     0.0393228 |
-| Mean    |       7.27907 |               0.3537985 |    1.380127 |  4.673573 |               0.7582498 |           0.2890607 |             0.2785470 |         0.5264764 |               4.506621 |                     0.0397244 |
-| 3rd Qu. |       9.00000 |               0.4121212 |    1.000000 |  5.000000 |               1.0000000 |           0.5000000 |             0.3684211 |         0.6075949 |               4.830467 |                     0.0503979 |
-| Max.    |      10.00000 |               0.8666667 |   74.000000 | 93.000000 |               1.0000000 |           1.0000000 |             1.0000000 |         0.9000000 |               5.971660 |                     0.1194539 |
-
-The table below shows the result of the `TrainStatSum` function for the
-`shares` group below 1400.
-
-``` r
-TrainStatSum("below 1400")
-```
-
-|         | num\_keywords | avg\_positive\_polarity | num\_videos | num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
-| ------- | ------------: | ----------------------: | ----------: | --------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
-| Min.    |      1.000000 |               0.0000000 |    0.000000 |  0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
-| 1st Qu. |      6.000000 |               0.3038841 |    0.000000 |  1.000000 |               0.6000000 |           0.0000000 |             0.2000000 |         0.4783505 |               4.476431 |                     0.0271186 |
-| Median  |      7.000000 |               0.3565605 |    0.000000 |  1.000000 |               0.8000000 |           0.1000000 |             0.3000000 |         0.5413712 |               4.663551 |                     0.0373057 |
-| Mean    |      7.023509 |               0.3542173 |    1.353505 |  4.081846 |               0.7557345 |           0.2646893 |             0.3037970 |         0.5353332 |               4.565993 |                     0.0382616 |
-| 3rd Qu. |      8.000000 |               0.4121212 |    1.000000 |  2.000000 |               1.0000000 |           0.5000000 |             0.4029851 |         0.6100796 |               4.852632 |                     0.0487805 |
-| Max.    |     10.000000 |               1.0000000 |   50.000000 | 91.000000 |               1.0000000 |           1.0000000 |             0.9402985 |         1.0000000 |               6.512690 |                     0.1213873 |
-
-The figure below shows a correlation plot of the correlations between
-the variables in the training data set. The `cor` function was used from
-the `corrplot` library.
-
-``` r
-correlation <- cor(weekdayDataTrain %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
-           max_positive_polarity, title_subjectivity, rate_negative_words,
-           n_unique_tokens, average_token_length, global_rate_positive_words), method = "spearman")
-
-corrplot(correlation, type = "upper", tl.pos = "lt")
-```
-
-![](READMEtemplate_files/figure-gfm/correlation-1.png)<!-- -->
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##       4     913    1400    3641    2700  652900
 
 # Modeling
 
@@ -351,61 +294,107 @@ bag_misClass
 
     ## [1] 0.4847424
 
-## Select Best Multiple Linear Regression Model
+## Select Linear Regression Model
 
-In this section, the best multiple linear regression model fit is
-selected based on AIC and adjusted R squared.
+This section will discuss methods for selecting a linear regression
+model from a collection of linear regression models. Correlations of
+numeric predictor variables with each other and with the response
+variable `shares` were used to create the collection of variables.
+Predictor variables with lower correlations with each other and the
+`shares` variable were used because higher correlations can interfere
+with model performance.
+
+The figure below shows a correlation plot of the correlations between
+the predictor variables in the training data set. The `cor` function was
+used from the `corrplot` library.
 
 ``` r
-mlrFit1 <- lm(shares ~ num_keywords + avg_positive_polarity + 
-                num_videos + num_imgs, data = weekdayDataTrain)
+correlation <- cor(weekdayDataTrain %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
+           max_positive_polarity, title_subjectivity, rate_negative_words,
+           n_unique_tokens, average_token_length, global_rate_positive_words, shares), method = "spearman")
 
-mlrFit2 <- lm(shares ~ max_positive_polarity + title_subjectivity, 
-              data = weekdayDataTrain)
-
-mlrFit3 <- lm(shares ~ num_keywords + rate_negative_words,
-              data = weekdayDataTrain)
-
-mlrFit4 <- lm(shares ~ n_unique_tokens + average_token_length + 
-                 global_rate_positive_words, data = weekdayDataTrain)
+corrplot(correlation, type = "upper", tl.pos = "lt")
+corrplot(correlation, type = "lower", method = "number", add = TRUE, tl.pos = "n")
 ```
+
+![](READMEtemplate_files/figure-gfm/correlation-1.png)<!-- -->
+
+Next, two simple linear regression models and three multiple linear
+regression models were selected. The `lm` function was used to find the
+best fit.
+
+``` r
+mlrFit1 <- lm(shares ~ num_keywords + num_imgs, data = weekdayDataTrain)
+
+mlrFit2 <- lm(shares ~ num_keywords, 
+              data = weekdayDataTrain)
+
+mlrFit3 <- lm(shares ~ num_imgs + num_videos + global_rate_positive_words,
+              data = weekdayDataTrain)
+
+mlrFit4 <- lm(shares ~ n_unique_tokens + max_positive_polarity, data = weekdayDataTrain)
+
+mlrFit5 <- lm(shares ~ global_rate_positive_words, weekdayDataTrain)
+```
+
+To select the best linear regression model, adjusted R square, AIC, and
+BIC values for each model fit are used to determine which model predicts
+the `shares` value the best.
 
 ``` r
 library(MuMIn)
 
-compareFitStats <- function(mlrFit1, mlrFit2, mlrFit3, mlrFit4){
+compareFitStats <- function(mlrFit1, mlrFit2, mlrFit3, mlrFit4, mlrFit5){
   fitStats <- data.frame(fitStat = c("Adj R Square", "AIC", "BIC"),
-  col1 = c(round(summary(mlrFit1)$adj.r.squared, 5), AIC(mlrFit1),
+  Fit1 = c(round(summary(mlrFit1)$adj.r.squared, 5), AIC(mlrFit1),
                  BIC(mlrFit1)),
-  col2 = c(round(summary(mlrFit2)$adj.r.squared, 5), AIC(mlrFit2),
+  Fit2 = c(round(summary(mlrFit2)$adj.r.squared, 5), AIC(mlrFit2),
                  BIC(mlrFit2)),
-  col3 = c(round(summary(mlrFit3)$adj.r.squared, 5), AIC(mlrFit3),
+  Fit3 = c(round(summary(mlrFit3)$adj.r.squared, 5), AIC(mlrFit3),
                 BIC(mlrFit3)),
-  col4 = c(round(summary(mlrFit4)$adj.r.squared, 5), AIC(mlrFit4),
-                BIC(mlrFit4)))
+  Fit4 = c(round(summary(mlrFit4)$adj.r.squared, 5), AIC(mlrFit4),
+                BIC(mlrFit4)),
+  Fit5 = c(round(summary(mlrFit5)$adj.r.squared, 5), AIC(mlrFit5),
+                BIC(mlrFit5)))
   
   #put names in data frame
   calls <- as.list(match.call())
   calls[[1]] <- NULL
-  names(fitStats[2:5]) <- unlist(calls)
+  names(fitStats[2:6]) <- unlist(calls)
   fitStats
 }
 ```
 
-``` r
-fitStats <- compareFitStats(mlrFit1, mlrFit2, mlrFit3, mlrFit4)
-```
+The table below shows the adjusted R square, AIC, and BIC for each model
+fit. Larger adjusted R square values and smaller AIC and BIC values are
+better.
 
 ``` r
-mlrFit1_pred <- predict(mlrFit1, newdata = weekdayDataTest)
-RMSE(weekdayDataTest$shares, mlrFit1_pred)
+fitStats <- compareFitStats(mlrFit1, mlrFit2, mlrFit3, mlrFit4, mlrFit5)
+
+fitStats
 ```
 
-    ## [1] 17559.41
+    ##        fitStat         Fit1        Fit2         Fit3         Fit4         Fit5
+    ## 1 Adj R Square      0.00047      0.0002      0.00014      0.00003     -0.00015
+    ## 2          AIC 101745.11589 101745.3840 101747.63918 101747.16981 101747.01868
+    ## 3          BIC 101770.90469 101764.7256 101779.87518 101772.95861 101766.36028
+
+Root mean square error (RMSE) for the training data set and the testing
+data set are also used to select the best model. The `predict` function
+was used to make a prediction and the `RMSE` function was used to
+calculate the RMSE.
 
 ``` r
-mlrFit4_pred <- predict(mlrFit4, newdata = weekdayDataTest)
-RMSE(weekdayDataTest$shares, mlrFit4_pred)
+mlrFit1_predTrain <- predict(mlrFit1, newdata = weekdayDataTrain)
+RMSE(weekdayDataTrain$shares, mlrFit1_predTrain)
 ```
 
-    ## [1] 17577.04
+    ## [1] 13258.29
+
+``` r
+mlrFit1_predTest <- predict(mlrFit1, newdata = weekdayDataTest)
+RMSE(weekdayDataTest$shares, mlrFit1_predTest)
+```
+
+    ## [1] 17565.25
