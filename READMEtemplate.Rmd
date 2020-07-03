@@ -36,7 +36,7 @@ reports <- tibble(filename = output_file, params)
 
 ```{r rmarkdown automation, eval = FALSE, echo = FALSE}
 apply(reports, MARGIN = 1, FUN = function(x){
-  render("template.Rmd", 
+  render("READMEtemplate.Rmd", 
          output_file = x[[1]], params = x[[2]])
 })
 ```
@@ -58,7 +58,7 @@ library(caret)
 
 ```
 
-# `r params$day` Data
+# `r capitalize(params$day)` Data
 
 The full data set contained data for all days of the week. This analysis will focus on the data from `r params$day`. Once the data was filtered for `r params$day`, the `shares` variable was divided into two groups: < 1400 and >= 1400 in preparation for fitting the bagged tree model.
 
@@ -131,14 +131,16 @@ This section covers some basic summary statistics about the variables in the tra
 
 ## Histogram
 
-The histogram below shows the distribution of `shares` using the training data set.
+The histogram below shows the distribution of `shares` using the training data set. The `geom_histogram` function from the `ggplot2` library was used to create the histogram.
 
 ```{r histogram, echo = TRUE}
 g <- ggplot(weekdayDataTrain, aes(x = shares))
 g + geom_histogram(bins = 100)
 ```
 
-The bar graph below shows the counts for the two groups of shares.
+## Bar Graph
+
+The bar graph below shows the counts for the two groups of shares using the training data set. The `geom_bar` function from the `ggplot2` library was used to create the bar graph.
 
 ```{r bar plot, echo = TRUE}
 
@@ -146,9 +148,15 @@ g <- ggplot(data = weekdayDataTrain, aes(x = shares_group))
 g + geom_bar() + labs(x = "Shares Group", title = (paste0(capitalize(params$day)," Shares Groups")))
 ```
 
+## Numerical Summary
+
+This is a numerical summary of the counts of shares in the two groups using the training data set. The `table` function was used to create the frequency table.
+
 ```{r shares_group count, echo = TRUE}
 table(weekdayDataTrain$shares_group)
 ```
+
+Here a function was used to calculate a numerical summary of the training data set for the two `shares` groups. The numerical summary includes the maximum, minimum, median, mean, 3rd quartile, and 1st quartile. The `summary` function was used to create the table.
 
 ```{r TrainData stat summary, echo = TRUE}
 
@@ -165,13 +173,19 @@ TrainStatSum <- function(group){
 
 ```
 
+The table below shows the result of the `TrainStatSum` function for the `shares` group above 1400.
+
 ```{r above 1400, echo = TRUE}
 TrainStatSum("above 1400")
 ```
 
+The table below shows the result of the `TrainStatSum` function for the `shares` group below 1400.
+
 ```{r below 1400, echo = TRUE}
 TrainStatSum("below 1400")
 ```
+
+The figure below shows a correlation plot of the correlations between the variables in the training data set. The `cor` function was used from the `corrplot` library. 
 
 ```{r correlation, echo = TRUE}
 correlation <- cor(weekdayDataTrain %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
@@ -184,7 +198,11 @@ corrplot(correlation, type = "upper", tl.pos = "lt")
 
 # Modeling
 
+This section will fit two types of models to predict the `shares` variable. One model is an ensemble model and the other model is a multiple linear regression model. The training data set was used to fit the two models and the test data set was used to make predictions.
+
 ## Ensemble Model: Bagged Tree
+
+The `caret` package was used to fit the bagged tree model. Repeated cross validation was used in the `trainControl` function. This result was fed into the `train` function with the method specified as `treebag` for a bagged tree model to train the tree on the sample. The predictors were centered and scaled in the `preProcess` argument. This method does not have any tuning parameters. The best model fit is shown below.
 
 ```{r bagged tree , echo = TRUE, message = FALSE}
 
@@ -198,11 +216,15 @@ bag_fit <- train(shares_group ~ num_keywords + avg_positive_polarity + num_video
 bag_fit
 ```
 
+The best bagged tree model fit was used to predict the `shares` groups using the test data set. The top of the bagged tree model prediction is shown below.
+
 ```{r predict bag tree , echo = TRUE}
 bag_pred <- predict(bag_fit, newdata = weekdayDataTest)
 
 head(bag_pred)
 ```
+
+A data frame of the prediction based on the test data set and the test data set are shown below.
 
 ```{r bag fit info , echo = TRUE}
 bag_fitInfo <- tbl_df(data.frame(bag_pred, weekdayDataTest$shares_group, weekdayDataTest$num_keywords, 
@@ -212,11 +234,15 @@ bag_fitInfo <- tbl_df(data.frame(bag_pred, weekdayDataTest$shares_group, weekday
 bag_fitInfo
 ```
 
+A frequency table of the bagged tree prediction and the `shares_group` column from the test data set are shown below. This table will be used to calculate the misclassification rate. The `table` function was used to create the frequency table.
+
 ```{r bag table , echo = TRUE}
 bag_tbl <- table(bag_fitInfo$bag_pred, bag_fitInfo$weekdayDataTest.shares_group)
 
 bag_tbl
 ```
+
+The misclassification rate for the bagged tree model is shown below. 
 
 ```{r bag misclass, echo = TRUE}
 bag_misClass <- 1 - sum(diag(bag_tbl))/sum(bag_tbl)
@@ -225,6 +251,8 @@ bag_misClass
 ```
 
 ## Select Best Multiple Linear Regression Model
+
+In this section, the best multiple linear regression model fit is selected based on AIC and adjusted R squared. 
 
 ```{r mlr, echo = TRUE}
 mlrFit1 <- lm(shares ~ num_keywords + avg_positive_polarity + 
