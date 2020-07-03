@@ -19,6 +19,8 @@ use the parameter functionality of markdown to automatically generate an
 analysis report for each `weekday_is_*` variable (so you’ll end up with
 seven total outputted documents).
 
+[Monday](MondayAnalysis.md)
+
 # Introduction Online News Popularity Data
 
 The data used for this analysis was obtained from the [UCI Machine
