@@ -25,10 +25,9 @@ library(tidyverse)
 library(Hmisc)
 
 #days of the week
-days <- c("monday")
-          #"tuesday", "wednesday",
-          #"thursday", "friday", "saturday",
-           #"sunday")
+days <- c("monday", "tuesday", "wednesday",
+          "thursday", "friday", "saturday",
+           "sunday")
 
 #create file names
 output_file <- paste0(capitalize(days), "Analysis.md")

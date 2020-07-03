@@ -5,7 +5,7 @@ July 3, 2020
 
   - [Introduction Online News Popularity
     Data](#introduction-online-news-popularity-data)
-  - [Monday Data](#monday-data)
+  - [Friday Data](#friday-data)
   - [Summary Statistics](#summary-statistics)
       - [Histogram](#histogram)
       - [Bar Plot](#bar-plot)
@@ -50,11 +50,11 @@ library(knitr)
 library(caret)
 ```
 
-# Monday Data
+# Friday Data
 
 The full data set contained data for all days of the week. This analysis
-will focus on the data from monday. Once the data was filtered for
-monday, the `shares` variable was divided into two groups: \< 1400 and
+will focus on the data from friday. Once the data was filtered for
+friday, the `shares` variable was divided into two groups: \< 1400 and
 \>= 1400 in preparation for fitting the bagged tree model.
 
 ``` r
@@ -111,12 +111,12 @@ head(weekdayData)
     ## # A tibble: 6 x 12
     ##   num_keywords avg_positive_po~ num_videos num_imgs max_positive_po~
     ##          <dbl>            <dbl>      <dbl>    <dbl>            <dbl>
-    ## 1            5            0.379          0        1              0.7
-    ## 2            4            0.287          0        1              0.7
-    ## 3            6            0.496          0        1              1  
-    ## 4            7            0.386          0        1              0.8
-    ## 5            7            0.411          0       20              1  
-    ## 6            9            0.351          0        0              0.6
+    ## 1           10            0.310          0        1             0.75
+    ## 2            7            0.621         12        0             1   
+    ## 3            5            0.381          0        1             0.6 
+    ## 4           10            0.281          0        0             0.9 
+    ## 5            7            0.53          21        0             1   
+    ## 6            8            0.329          0        1             0.8 
     ## # ... with 7 more variables: title_subjectivity <dbl>,
     ## #   rate_negative_words <dbl>, n_unique_tokens <dbl>,
     ## #   average_token_length <dbl>, global_rate_positive_words <dbl>, shares <dbl>,
@@ -153,7 +153,7 @@ g <- ggplot(weekdayDataTrain, aes(x = shares))
 g + geom_histogram(bins = 100)
 ```
 
-![](MondayAnalysis_files/figure-gfm/histogram-1.png)<!-- -->
+![](FridayAnalysis_files/figure-gfm/histogram-1.png)<!-- -->
 
 ## Bar Plot
 
@@ -166,7 +166,7 @@ g <- ggplot(data = weekdayDataTrain, aes(x = shares_group))
 g + geom_bar() + labs(x = "Shares Group", title = (paste0(capitalize(params$day)," Shares Groups")))
 ```
 
-![](MondayAnalysis_files/figure-gfm/bar%20plot-1.png)<!-- -->
+![](FridayAnalysis_files/figure-gfm/bar%20plot-1.png)<!-- -->
 
 ## Numerical Summary
 
@@ -180,7 +180,7 @@ table(weekdayDataTrain$shares_group)
 
     ## 
     ## above 1400 below 1400 
-    ##       2365       2297
+    ##       2188       1802
 
 This is a summary of the `shares` variable in the training data set
 which inlcudes: minimum, 1st quartile, median, mean, 3rd quartile, and
@@ -190,8 +190,8 @@ maximum.
 summary(weekdayDataTrain$shares)
 ```
 
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##       4     913    1400    3641    2700  652900
+    ##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    ##     22.0    984.2   1500.0   3309.2   2700.0 233400.0
 
 The `TrainStatSum` function calculates a statistical summary for all the
 variables of interest in the two `shares` groups.
@@ -215,14 +215,14 @@ The function is called for the `shares` above 1400.
 TrainStatSum("above 1400")
 ```
 
-|         | num\_keywords | avg\_positive\_polarity | num\_videos | num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
-| ------- | ------------: | ----------------------: | ----------: | --------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
-| Min.    |       2.00000 |               0.0000000 |    0.000000 |  0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
-| 1st Qu. |       6.00000 |               0.3060905 |    0.000000 |  1.000000 |               0.6000000 |           0.0000000 |             0.1764706 |         0.4689119 |               4.475000 |                     0.0294118 |
-| Median  |       7.00000 |               0.3604167 |    0.000000 |  1.000000 |               0.8000000 |           0.1500000 |             0.2692308 |         0.5442804 |               4.648230 |                     0.0393228 |
-| Mean    |       7.27907 |               0.3537985 |    1.380127 |  4.673573 |               0.7582498 |           0.2890607 |             0.2785470 |         0.5264764 |               4.506621 |                     0.0397244 |
-| 3rd Qu. |       9.00000 |               0.4121212 |    1.000000 |  5.000000 |               1.0000000 |           0.5000000 |             0.3684211 |         0.6075949 |               4.830467 |                     0.0503979 |
-| Max.    |      10.00000 |               0.8666667 |   74.000000 | 93.000000 |               1.0000000 |           1.0000000 |             1.0000000 |         0.9000000 |               5.971660 |                     0.1194539 |
+|         | num\_keywords | avg\_positive\_polarity | num\_videos |  num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
+| ------- | ------------: | ----------------------: | ----------: | ---------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
+| Min.    |      1.000000 |               0.0000000 |     0.00000 |   0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
+| 1st Qu. |      6.000000 |               0.3132597 |     0.00000 |   1.000000 |               0.6000000 |           0.0000000 |             0.1891892 |         0.4749274 |               4.465522 |                     0.0301290 |
+| Median  |      7.000000 |               0.3605364 |     0.00000 |   1.000000 |               0.8000000 |           0.1250000 |             0.2758621 |         0.5458734 |               4.653505 |                     0.0401533 |
+| Mean    |      7.271938 |               0.3588063 |     1.41819 |   4.821755 |               0.7656961 |           0.2865835 |             0.2828453 |         0.5358649 |               4.549521 |                     0.0407668 |
+| 3rd Qu. |      9.000000 |               0.4134619 |     1.00000 |   6.000000 |               1.0000000 |           0.5000000 |             0.3750000 |         0.6166667 |               4.848241 |                     0.0512058 |
+| Max.    |     10.000000 |               1.0000000 |    91.00000 | 108.000000 |               1.0000000 |           1.0000000 |             1.0000000 |         0.9473684 |               6.285985 |                     0.1369863 |
 
 The function is called for the `shares` below 1400.
 
@@ -230,14 +230,14 @@ The function is called for the `shares` below 1400.
 TrainStatSum("below 1400")
 ```
 
-|         | num\_keywords | avg\_positive\_polarity | num\_videos | num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
-| ------- | ------------: | ----------------------: | ----------: | --------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
-| Min.    |      1.000000 |               0.0000000 |    0.000000 |  0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
-| 1st Qu. |      6.000000 |               0.3038841 |    0.000000 |  1.000000 |               0.6000000 |           0.0000000 |             0.2000000 |         0.4783505 |               4.476431 |                     0.0271186 |
-| Median  |      7.000000 |               0.3565605 |    0.000000 |  1.000000 |               0.8000000 |           0.1000000 |             0.3000000 |         0.5413712 |               4.663551 |                     0.0373057 |
-| Mean    |      7.023509 |               0.3542173 |    1.353505 |  4.081846 |               0.7557345 |           0.2646893 |             0.3037970 |         0.5353332 |               4.565993 |                     0.0382616 |
-| 3rd Qu. |      8.000000 |               0.4121212 |    1.000000 |  2.000000 |               1.0000000 |           0.5000000 |             0.4029851 |         0.6100796 |               4.852632 |                     0.0487805 |
-| Max.    |     10.000000 |               1.0000000 |   50.000000 | 91.000000 |               1.0000000 |           1.0000000 |             0.9402985 |         1.0000000 |               6.512690 |                     0.1213873 |
+|         | num\_keywords | avg\_positive\_polarity | num\_videos |  num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
+| ------- | ------------: | ----------------------: | ----------: | ---------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
+| Min.    |      1.000000 |               0.0000000 |    0.000000 |   0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
+| 1st Qu. |      6.000000 |               0.3000462 |    0.000000 |   1.000000 |               0.5000000 |           0.0000000 |             0.2046911 |         0.4771884 |               4.474566 |                     0.0251046 |
+| Median  |      7.000000 |               0.3538025 |    0.000000 |   1.000000 |               0.8000000 |           0.1000000 |             0.3000000 |         0.5453835 |               4.677769 |                     0.0361555 |
+| Mean    |      7.150943 |               0.3496097 |    1.188124 |   3.963929 |               0.7358707 |           0.2678713 |             0.3113334 |         0.5393832 |               4.562084 |                     0.0372842 |
+| 3rd Qu. |      9.000000 |               0.4078002 |    1.000000 |   2.000000 |               1.0000000 |           0.5000000 |             0.4166667 |         0.6168224 |               4.879445 |                     0.0479642 |
+| Max.    |     10.000000 |               0.8000000 |   74.000000 | 100.000000 |               1.0000000 |           1.0000000 |             1.0000000 |         0.9250000 |               6.431034 |                     0.1315789 |
 
 # Modeling
 
@@ -270,17 +270,17 @@ bag_fit
 
     ## Bagged CART 
     ## 
-    ## 4662 samples
+    ## 3990 samples
     ##    4 predictor
     ##    2 classes: 'above 1400', 'below 1400' 
     ## 
     ## Pre-processing: centered (4), scaled (4) 
     ## Resampling: Cross-Validated (10 fold, repeated 3 times) 
-    ## Summary of sample sizes: 4196, 4197, 4196, 4196, 4195, 4196, ... 
+    ## Summary of sample sizes: 3592, 3591, 3591, 3590, 3591, 3591, ... 
     ## Resampling results:
     ## 
-    ##   Accuracy   Kappa     
-    ##   0.5125164  0.02478471
+    ##   Accuracy   Kappa    
+    ##   0.5209675  0.0249055
 
 The best bagged tree model fit was used to predict the `shares` groups
 using the test data set. The top of the bagged tree model prediction is
@@ -292,7 +292,7 @@ bag_pred <- predict(bag_fit, newdata = weekdayDataTest)
 head(bag_pred)
 ```
 
-    ## [1] above 1400 below 1400 below 1400 below 1400 above 1400 above 1400
+    ## [1] below 1400 above 1400 above 1400 above 1400 above 1400 above 1400
     ## Levels: above 1400 below 1400
 
 A data frame of the prediction based on the test data set and the test
@@ -306,20 +306,20 @@ bag_fitInfo <- tbl_df(data.frame(bag_pred, weekdayDataTest$shares_group, weekday
 bag_fitInfo
 ```
 
-    ## # A tibble: 1,999 x 6
+    ## # A tibble: 1,711 x 6
     ##    bag_pred weekdayDataTest~ weekdayDataTest~ weekdayDataTest~ weekdayDataTest~
     ##    <fct>    <fct>                       <dbl>            <dbl>            <dbl>
-    ##  1 above 1~ below 1400                      4            0.287                0
-    ##  2 below 1~ below 1400                      7            0.411                0
-    ##  3 below 1~ below 1400                      9            0.428                0
-    ##  4 below 1~ above 1400                      7            0.567                0
-    ##  5 above 1~ below 1400                      5            0.298                1
-    ##  6 above 1~ above 1400                      8            0.404                0
-    ##  7 above 1~ above 1400                      7            0.435                0
-    ##  8 below 1~ below 1400                      8            0.376                0
-    ##  9 above 1~ above 1400                      8            0.427                0
-    ## 10 below 1~ above 1400                     10            0.408                0
-    ## # ... with 1,989 more rows, and 1 more variable: weekdayDataTest.num_imgs <dbl>
+    ##  1 below 1~ above 1400                      7            0.621               12
+    ##  2 above 1~ above 1400                      7            0.53                21
+    ##  3 above 1~ below 1400                      8            0.329                0
+    ##  4 above 1~ below 1400                     10            0.260                0
+    ##  5 above 1~ below 1400                      9            0.430                0
+    ##  6 above 1~ above 1400                      6            0.386                0
+    ##  7 above 1~ above 1400                     10            0.492                0
+    ##  8 above 1~ above 1400                     10            0.4                  1
+    ##  9 above 1~ above 1400                      9            0.458                0
+    ## 10 above 1~ above 1400                      8            0.481                0
+    ## # ... with 1,701 more rows, and 1 more variable: weekdayDataTest.num_imgs <dbl>
 
 A frequency table of the bagged tree prediction and the `shares_group`
 column from the test data set are shown below. This table will be used
@@ -334,8 +334,8 @@ bag_tbl
 
     ##             
     ##              above 1400 below 1400
-    ##   above 1400        547        490
-    ##   below 1400        479        483
+    ##   above 1400        566        452
+    ##   below 1400        359        334
 
 The misclassification rate for the bagged tree model is shown below.
 
@@ -345,7 +345,7 @@ bag_misClass <- 1 - sum(diag(bag_tbl))/sum(bag_tbl)
 bag_misClass
 ```
 
-    ## [1] 0.4847424
+    ## [1] 0.4739918
 
 ## Select Linear Regression Model
 
@@ -371,7 +371,7 @@ corrplot(correlation, type = "upper", tl.pos = "lt")
 corrplot(correlation, type = "lower", method = "number", add = TRUE, tl.pos = "n")
 ```
 
-![](MondayAnalysis_files/figure-gfm/correlation-1.png)<!-- -->
+![](FridayAnalysis_files/figure-gfm/correlation-1.png)<!-- -->
 
 Linear regression models can be formed based on the predictor variables
 with lower correlations. In this example, two simple linear regression
@@ -431,10 +431,10 @@ fitStats <- compareFitStats(mlrFit1, mlrFit2, mlrFit3, mlrFit4, mlrFit5)
 fitStats
 ```
 
-    ##        fitStat         Fit1        Fit2         Fit3         Fit4         Fit5
-    ## 1 Adj R Square      0.00047      0.0002      0.00014      0.00003     -0.00015
-    ## 2          AIC 101745.11589 101745.3840 101747.63918 101747.16981 101747.01868
-    ## 3          BIC 101770.90469 101764.7256 101779.87518 101772.95861 101766.36028
+    ##        fitStat        Fit1        Fit2        Fit3        Fit4        Fit5
+    ## 1 Adj R Square     0.00189     0.00056     0.00402     0.00066     0.00043
+    ## 2          AIC 83484.27463 83488.56817 83476.74435 83489.17197 83489.09020
+    ## 3          BIC 83509.44081 83507.44281 83508.20208 83514.33815 83507.96484
 
 For this example the first linear regression model was selected to
 demonstrate predicting with test data and calculating the root mean
@@ -449,10 +449,10 @@ head(mlrFit1_predTest)
 ```
 
     ##        1        2        3        4        5        6 
-    ## 3121.389 4190.073 4441.841 3462.671 3247.273 3624.925
+    ## 3107.823 3107.823 3264.134 3497.352 4095.376 3030.915
 
 ``` r
 RMSE(weekdayDataTest$shares, mlrFit1_predTest)
 ```
 
-    ## [1] 17565.25
+    ## [1] 7357.244
