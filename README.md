@@ -5,8 +5,9 @@ July 3, 2020
 
   - [Introduction Online News Popularity
     Data](#introduction-online-news-popularity-data)
-  - [Monday Data](#monday-data)
+  - [monday Data](#monday-data)
   - [Summary Statistics](#summary-statistics)
+      - [Histogram](#histogram)
   - [Modeling](#modeling)
       - [Ensemble Model: Bagged Tree](#ensemble-model-bagged-tree)
       - [Select Best Multiple Linear Regression
@@ -47,7 +48,7 @@ library(knitr)
 library(caret)
 ```
 
-# Monday Data
+# monday Data
 
 The full data set contained data for all days of the week. This analysis
 will focus on the data from monday. Once the data was filtered for
@@ -81,19 +82,21 @@ weekdayData$shares_group <- as.factor(weekdayData$shares_group)
 The following variables were used in this analysis to predict the
 `shares` variable:
 
-  - `num_keywords` : Number of keywords in the metadata
-  - `avg_positive_polarity`
-  - `num_videos`
-  - `num_imgs`
-  - `max_postive_polarity`
-  - `title_subjectivity`
-  - `rate_negative_words`
-  - `n_unique_tokens`
-  - `average_token_length`
-  - `global_rate_positive_words`
-  - `shares`
+  - `num_keywords` : Number of keywords in the metadata.
+  - `avg_positive_polarity` : Average polarity of positive words.
+  - `num_videos`: Number of videos.
+  - `num_imgs`: Number of images.
+  - `max_postive_polarity`: Maximum polarity of positive words.
+  - `title_subjectivity`: Title subjectivity.
+  - `rate_negative_words`: Rate of negative words among non-neutral
+    tokens.
+  - `n_unique_tokens`: Number of words in the title.
+  - `average_token_length`: Average length of the words in the content.
+  - `global_rate_positive_words`: Rate of positive words in the content.
+  - `shares`: Number of shares.
 
-<!-- end list -->
+The data frame below shows the subsetted data set with only the
+variables of interest for this analysis.
 
 ``` r
 weekdayData <- weekdayData %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
@@ -117,6 +120,11 @@ head(weekdayData)
     ## #   average_token_length <dbl>, global_rate_positive_words <dbl>, shares <dbl>,
     ## #   shares_group <fct>
 
+The subsetted data set was randomly sampled using the `sample` function.
+The training data set consists of 70% of the data and the testing data
+set consists of 30% of the data. The `set.seed` function was used to
+make the work reproducible.
+
 ``` r
 #Create test/train data sets from filtered data set
 set.seed(1)
@@ -128,12 +136,22 @@ weekdayDataTest <- weekdayData[test, ]
 
 # Summary Statistics
 
+This section covers some basic summary statistics about the variables in
+the training data set.
+
+## Histogram
+
+The histogram below shows the distribution of `shares` using the
+training data set.
+
 ``` r
 g <- ggplot(weekdayDataTrain, aes(x = shares))
 g + geom_histogram(bins = 100)
 ```
 
 ![](README_files/figure-gfm/histogram-1.png)<!-- -->
+
+The bar graph below shows the counts for the two groups of shares.
 
 ``` r
 g <- ggplot(data = weekdayDataTrain, aes(x = shares_group))

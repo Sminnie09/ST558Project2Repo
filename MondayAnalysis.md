@@ -5,8 +5,11 @@ July 3, 2020
 
   - [Introduction Online News Popularity
     Data](#introduction-online-news-popularity-data)
-  - [monday Data](#monday-data)
+  - [Monday Data](#monday-data)
   - [Summary Statistics](#summary-statistics)
+      - [Histogram](#histogram)
+      - [Bar Graph](#bar-graph)
+      - [Numerical Summary](#numerical-summary)
   - [Modeling](#modeling)
       - [Ensemble Model: Bagged Tree](#ensemble-model-bagged-tree)
       - [Select Best Multiple Linear Regression
@@ -47,7 +50,7 @@ library(knitr)
 library(caret)
 ```
 
-# monday Data
+# Monday Data
 
 The full data set contained data for all days of the week. This analysis
 will focus on the data from monday. Once the data was filtered for
@@ -81,19 +84,21 @@ weekdayData$shares_group <- as.factor(weekdayData$shares_group)
 The following variables were used in this analysis to predict the
 `shares` variable:
 
-  - `num_keywords` : Number of keywords in the metadata
-  - `avg_positive_polarity`
-  - `num_videos`
-  - `num_imgs`
-  - `max_postive_polarity`
-  - `title_subjectivity`
-  - `rate_negative_words`
-  - `n_unique_tokens`
-  - `average_token_length`
-  - `global_rate_positive_words`
-  - `shares`
+  - `num_keywords` : Number of keywords in the metadata.
+  - `avg_positive_polarity` : Average polarity of positive words.
+  - `num_videos`: Number of videos.
+  - `num_imgs`: Number of images.
+  - `max_postive_polarity`: Maximum polarity of positive words.
+  - `title_subjectivity`: Title subjectivity.
+  - `rate_negative_words`: Rate of negative words among non-neutral
+    tokens.
+  - `n_unique_tokens`: Number of words in the title.
+  - `average_token_length`: Average length of the words in the content.
+  - `global_rate_positive_words`: Rate of positive words in the content.
+  - `shares`: Number of shares.
 
-<!-- end list -->
+The data frame below shows the subsetted data set with only the
+variables of interest for this analysis.
 
 ``` r
 weekdayData <- weekdayData %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
@@ -117,6 +122,11 @@ head(weekdayData)
     ## #   average_token_length <dbl>, global_rate_positive_words <dbl>, shares <dbl>,
     ## #   shares_group <fct>
 
+The subsetted data set was randomly sampled using the `sample` function.
+The training data set consists of 70% of the data and the testing data
+set consists of 30% of the data. The `set.seed` function was used to
+make the work reproducible.
+
 ``` r
 #Create test/train data sets from filtered data set
 set.seed(1)
@@ -128,19 +138,40 @@ weekdayDataTest <- weekdayData[test, ]
 
 # Summary Statistics
 
+This section covers some basic summary statistics about the variables in
+the training data set.
+
+## Histogram
+
+The histogram below shows the distribution of `shares` using the
+training data set. The `geom_histogram` function from the `ggplot2`
+library was used to create the histogram.
+
 ``` r
 g <- ggplot(weekdayDataTrain, aes(x = shares))
 g + geom_histogram(bins = 100)
 ```
 
-![](MondayAnalysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](MondayAnalysis_files/figure-gfm/histogram-1.png)<!-- -->
+
+## Bar Graph
+
+The bar graph below shows the counts for the two groups of shares using
+the training data set. The `geom_bar` function from the `ggplot2`
+library was used to create the bar graph.
 
 ``` r
 g <- ggplot(data = weekdayDataTrain, aes(x = shares_group))
 g + geom_bar() + labs(x = "Shares Group", title = (paste0(capitalize(params$day)," Shares Groups")))
 ```
 
-![](MondayAnalysis_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](MondayAnalysis_files/figure-gfm/bar%20plot-1.png)<!-- -->
+
+## Numerical Summary
+
+This is a numerical summary of the counts of shares in the two groups
+using the training data set. The `table` function was used to create the
+frequency table.
 
 ``` r
 table(weekdayDataTrain$shares_group)
@@ -149,6 +180,11 @@ table(weekdayDataTrain$shares_group)
     ## 
     ## above 1400 below 1400 
     ##       2365       2297
+
+Here a function was used to calculate a numerical summary of the
+training data set for the two `shares` groups. The numerical summary
+includes the maximum, minimum, median, mean, 3rd quartile, and 1st
+quartile. The `summary` function was used to create the table.
 
 ``` r
 TrainStatSum <- function(group){
@@ -163,6 +199,9 @@ TrainStatSum <- function(group){
 }
 ```
 
+The table below shows the result of the `TrainStatSum` function for the
+`shares` group above 1400.
+
 ``` r
 TrainStatSum("above 1400")
 ```
@@ -175,6 +214,9 @@ TrainStatSum("above 1400")
 | Mean    |       7.27907 |               0.3537985 |    1.380127 |  4.673573 |               0.7582498 |           0.2890607 |             0.2785470 |         0.5264764 |               4.506621 |                     0.0397244 |
 | 3rd Qu. |       9.00000 |               0.4121212 |    1.000000 |  5.000000 |               1.0000000 |           0.5000000 |             0.3684211 |         0.6075949 |               4.830467 |                     0.0503979 |
 | Max.    |      10.00000 |               0.8666667 |   74.000000 | 93.000000 |               1.0000000 |           1.0000000 |             1.0000000 |         0.9000000 |               5.971660 |                     0.1194539 |
+
+The table below shows the result of the `TrainStatSum` function for the
+`shares` group below 1400.
 
 ``` r
 TrainStatSum("below 1400")
@@ -189,6 +231,10 @@ TrainStatSum("below 1400")
 | 3rd Qu. |      8.000000 |               0.4121212 |    1.000000 |  2.000000 |               1.0000000 |           0.5000000 |             0.4029851 |         0.6100796 |               4.852632 |                     0.0487805 |
 | Max.    |     10.000000 |               1.0000000 |   50.000000 | 91.000000 |               1.0000000 |           1.0000000 |             0.9402985 |         1.0000000 |               6.512690 |                     0.1213873 |
 
+The figure below shows a correlation plot of the correlations between
+the variables in the training data set. The `cor` function was used from
+the `corrplot` library.
+
 ``` r
 correlation <- cor(weekdayDataTrain %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
            max_positive_polarity, title_subjectivity, rate_negative_words,
@@ -197,11 +243,23 @@ correlation <- cor(weekdayDataTrain %>% select(num_keywords, avg_positive_polari
 corrplot(correlation, type = "upper", tl.pos = "lt")
 ```
 
-![](MondayAnalysis_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](MondayAnalysis_files/figure-gfm/correlation-1.png)<!-- -->
 
 # Modeling
 
+This section will fit two types of models to predict the `shares`
+variable. One model is an ensemble model and the other model is a
+multiple linear regression model. The training data set was used to fit
+the two models and the test data set was used to make predictions.
+
 ## Ensemble Model: Bagged Tree
+
+The `caret` package was used to fit the bagged tree model. Repeated
+cross validation was used in the `trainControl` function. This result
+was fed into the `train` function with the method specified as `treebag`
+for a bagged tree model to train the tree on the sample. The predictors
+were centered and scaled in the `preProcess` argument. This method does
+not have any tuning parameters. The best model fit is shown below.
 
 ``` r
 set.seed(1)
@@ -228,6 +286,10 @@ bag_fit
     ##   Accuracy   Kappa     
     ##   0.5125164  0.02478471
 
+The best bagged tree model fit was used to predict the `shares` groups
+using the test data set. The top of the bagged tree model prediction is
+shown below.
+
 ``` r
 bag_pred <- predict(bag_fit, newdata = weekdayDataTest)
 
@@ -236,6 +298,9 @@ head(bag_pred)
 
     ## [1] above 1400 below 1400 below 1400 below 1400 above 1400 above 1400
     ## Levels: above 1400 below 1400
+
+A data frame of the prediction based on the test data set and the test
+data set are shown below.
 
 ``` r
 bag_fitInfo <- tbl_df(data.frame(bag_pred, weekdayDataTest$shares_group, weekdayDataTest$num_keywords, 
@@ -260,6 +325,11 @@ bag_fitInfo
     ## 10 below 1~ above 1400                     10            0.408                0
     ## # ... with 1,989 more rows, and 1 more variable: weekdayDataTest.num_imgs <dbl>
 
+A frequency table of the bagged tree prediction and the `shares_group`
+column from the test data set are shown below. This table will be used
+to calculate the misclassification rate. The `table` function was used
+to create the frequency table.
+
 ``` r
 bag_tbl <- table(bag_fitInfo$bag_pred, bag_fitInfo$weekdayDataTest.shares_group)
 
@@ -271,6 +341,8 @@ bag_tbl
     ##   above 1400        547        490
     ##   below 1400        479        483
 
+The misclassification rate for the bagged tree model is shown below.
+
 ``` r
 bag_misClass <- 1 - sum(diag(bag_tbl))/sum(bag_tbl)
 
@@ -280,6 +352,9 @@ bag_misClass
     ## [1] 0.4847424
 
 ## Select Best Multiple Linear Regression Model
+
+In this section, the best multiple linear regression model fit is
+selected based on AIC and adjusted R squared.
 
 ``` r
 mlrFit1 <- lm(shares ~ num_keywords + avg_positive_polarity + 
