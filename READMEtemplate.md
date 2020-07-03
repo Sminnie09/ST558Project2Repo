@@ -5,7 +5,7 @@ July 3, 2020
 
   - [Introduction Online News Popularity
     Data](#introduction-online-news-popularity-data)
-  - [monday Data](#monday-data)
+  - [Monday Data](#monday-data)
   - [Summary Statistics](#summary-statistics)
       - [Histogram](#histogram)
       - [Bar Graph](#bar-graph)
@@ -50,7 +50,7 @@ library(knitr)
 library(caret)
 ```
 
-# monday Data
+# Monday Data
 
 The full data set contained data for all days of the week. This analysis
 will focus on the data from monday. Once the data was filtered for
