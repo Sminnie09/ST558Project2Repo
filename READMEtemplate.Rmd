@@ -131,16 +131,16 @@ This section covers some basic summary statistics about the variables in the tra
 
 ## Histogram
 
-The histogram below shows the distribution of `shares` using the training data set. The `geom_histogram` function from the `ggplot2` library was used to create the histogram.
+The histogram below shows the distribution of `shares` using the training data set. The majority of the number of shares are on the lower end with some higher outliers. The `geom_histogram` function from the `ggplot2` library was used to create the histogram.
 
 ```{r histogram, echo = TRUE}
 g <- ggplot(weekdayDataTrain, aes(x = shares))
 g + geom_histogram(bins = 100)
 ```
 
-## Bar Graph
+## Bar Plot
 
-The bar graph below shows the counts for the two groups of shares using the training data set. The `geom_bar` function from the `ggplot2` library was used to create the bar graph.
+The bar graph below shows the counts for the two groups of `shares` using the training data set. The `geom_bar` function from the `ggplot2` library was used to create the bar plot.
 
 ```{r bar plot, echo = TRUE}
 
@@ -157,14 +157,43 @@ table(weekdayDataTrain$shares_group)
 
 ```
 
+This is a summary of the `shares` variable in the training data set which inlcudes: minimum, 1st quartile, median, mean, 3rd quartile, and maximum.
+
 ```{r shares summary, echo = TRUE}
 summary(weekdayDataTrain$shares)
+```
+
+The `TrainStatSum` function calculates a statistical summary for all the variables of interest in the two `shares` groups.
+
+```{r TrainStatSum function, echo = TRUE}
+TrainStatSum <- function(group){
+  data <- weekdayDataTrain %>% filter(shares_group == group) %>% 
+    select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
+           max_positive_polarity, title_subjectivity, rate_negative_words,
+           n_unique_tokens, average_token_length, global_rate_positive_words)
+           kable(apply(data, 2, summary, col.names = c("num_keywords", 
+           "avg_positive_polarity", "num_videos", "num_imgs", "max_positive_polarity", 
+           "title_subjectivity", "rate_negative_words", "n_unique_tokens", "average_token_length",
+           "global_rate_positive_words")))
+}
+```
+
+The function is called for the `shares` above 1400.
+
+```{r above 1400 stat summary, echo = TRUE}
+TrainStatSum("above 1400")
+```
+
+The function is called for the `shares` below 1400.
+
+```{r below 1400 stat summary, echo = TRUE}
+TrainStatSum("below 1400")
 ```
 
 
 # Modeling
 
-This section will fit two types of models to predict the `shares` variable. One model is an ensemble model and the other model is a multiple linear regression model. The training data set was used to fit the two models and the test data set was used to make predictions.
+This section will fit two types of models to predict the `shares` variable.The first section discusses a an ensemble model and the second section discusses the selection of a linear regression model from a collection of linear regression models. The training data set was used to fit the two models and the test data set was used to make predictions.
 
 ## Ensemble Model: Bagged Tree
 
@@ -218,9 +247,9 @@ bag_misClass
 
 ## Select Linear Regression Model
 
-This section will discuss methods for selecting a linear regression model from a collection of linear regression models. Correlations of numeric predictor variables with each other and with the response variable `shares` were used to create the collection of variables. Predictor variables with lower correlations with each other and the `shares` variable were used because higher correlations can interfere with model performance.
+This section will discuss methods for selecting a linear regression model from a collection of linear regression models. Correlations of numeric predictor variables with each other and with the response variable `shares` were used to create the collection of variables. Predictor variables with lower correlations with each other and the `shares` variable were used because higher correlations may interfere with model performance.
 
-The figure below shows a correlation plot of the correlations between the predictor variables in the training data set. The `cor` function was used from the `corrplot` library. 
+The figure below shows a correlation plot of the correlations between a subset of predictor variables from the full data set that were in the training data set. The `cor` function was used from the `corrplot` library. 
 
 ```{r correlation, echo = TRUE}
 correlation <- cor(weekdayDataTrain %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
@@ -232,7 +261,7 @@ corrplot(correlation, type = "lower", method = "number", add = TRUE, tl.pos = "n
 
 ```
 
-Next, two simple linear regression models and three multiple linear regression models were selected. The `lm` function was used to find the best fit.
+Linear regression models can be formed based on the predictor variables with lower correlations. In this example, two simple linear regression models and three multiple linear regression models were selected based on variables with lower correlations. The `lm` function was used to fit the models with the training data set.
 
 ```{r mlr, echo = TRUE}
 mlrFit1 <- lm(shares ~ num_keywords + num_imgs, data = weekdayDataTrain)
@@ -283,16 +312,13 @@ fitStats <- compareFitStats(mlrFit1, mlrFit2, mlrFit3, mlrFit4, mlrFit5)
 fitStats
 ```
 
-Root mean square error (RMSE) for the training data set and the testing data set are also used to select the best model. The `predict` function was used to make a prediction and the `RMSE` function was used to calculate the RMSE.
-
-```{r compare rmse Train, echo = TRUE}
-mlrFit1_predTrain <- predict(mlrFit1, newdata = weekdayDataTrain)
-RMSE(weekdayDataTrain$shares, mlrFit1_predTrain)
-
-```
+For this example the first linear regression model was selected to demonstrate predicting with test data and calculating the root mean square error (RMSE). RMSE for the testing data set are also used to select the best model. The `predict` function was used to make a prediction and the `RMSE` function was used to calculate the RMSE.
 
 ```{r compare rmse Test, echo = TRUE}
 mlrFit1_predTest <- predict(mlrFit1, newdata = weekdayDataTest)
+
+head(mlrFit1_predTest)
+
 RMSE(weekdayDataTest$shares, mlrFit1_predTest)
 ```
 

@@ -8,7 +8,7 @@ July 3, 2020
   - [Monday Data](#monday-data)
   - [Summary Statistics](#summary-statistics)
       - [Histogram](#histogram)
-      - [Bar Graph](#bar-graph)
+      - [Bar Plot](#bar-plot)
       - [Numerical Summary](#numerical-summary)
   - [Modeling](#modeling)
       - [Ensemble Model: Bagged Tree](#ensemble-model-bagged-tree)
@@ -34,9 +34,9 @@ from the data set. Two types of methods will be used to predict the
 `shares`. The first model discussed is a bagged tree model. For this
 analysis, the `shares` were divided into two groups (\< 1400 and \>=
 1400) to create a binary classification problem. The second model
-discussed is a multiple linear regression model. Both types of models
-were trained/tuned using the training data set and then then predictions
-were made using the test data set.
+discussed is linear regression. Both types of models were trained/tuned
+using the training data set and then then predictions were made using
+the test data set.
 
 The following libraries are loaded for the analysis.
 
@@ -144,8 +144,9 @@ the training data set.
 ## Histogram
 
 The histogram below shows the distribution of `shares` using the
-training data set. The `geom_histogram` function from the `ggplot2`
-library was used to create the histogram.
+training data set. The majority of the number of shares are on the lower
+end with some higher outliers. The `geom_histogram` function from the
+`ggplot2` library was used to create the histogram.
 
 ``` r
 g <- ggplot(weekdayDataTrain, aes(x = shares))
@@ -154,11 +155,11 @@ g + geom_histogram(bins = 100)
 
 ![](READMEtemplate_files/figure-gfm/histogram-1.png)<!-- -->
 
-## Bar Graph
+## Bar Plot
 
-The bar graph below shows the counts for the two groups of shares using
-the training data set. The `geom_bar` function from the `ggplot2`
-library was used to create the bar graph.
+The bar graph below shows the counts for the two groups of `shares`
+using the training data set. The `geom_bar` function from the `ggplot2`
+library was used to create the bar plot.
 
 ``` r
 g <- ggplot(data = weekdayDataTrain, aes(x = shares_group))
@@ -181,6 +182,10 @@ table(weekdayDataTrain$shares_group)
     ## above 1400 below 1400 
     ##       2365       2297
 
+This is a summary of the `shares` variable in the training data set
+which inlcudes: minimum, 1st quartile, median, mean, 3rd quartile, and
+maximum.
+
 ``` r
 summary(weekdayDataTrain$shares)
 ```
@@ -188,12 +193,60 @@ summary(weekdayDataTrain$shares)
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##       4     913    1400    3641    2700  652900
 
+The `TrainStatSum` function calculates a statistical summary for all the
+variables of interest in the two `shares` groups.
+
+``` r
+TrainStatSum <- function(group){
+  data <- weekdayDataTrain %>% filter(shares_group == group) %>% 
+    select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
+           max_positive_polarity, title_subjectivity, rate_negative_words,
+           n_unique_tokens, average_token_length, global_rate_positive_words)
+           kable(apply(data, 2, summary, col.names = c("num_keywords", 
+           "avg_positive_polarity", "num_videos", "num_imgs", "max_positive_polarity", 
+           "title_subjectivity", "rate_negative_words", "n_unique_tokens", "average_token_length",
+           "global_rate_positive_words")))
+}
+```
+
+The function is called for the `shares` above 1400.
+
+``` r
+TrainStatSum("above 1400")
+```
+
+|         | num\_keywords | avg\_positive\_polarity | num\_videos | num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
+| ------- | ------------: | ----------------------: | ----------: | --------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
+| Min.    |       2.00000 |               0.0000000 |    0.000000 |  0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
+| 1st Qu. |       6.00000 |               0.3060905 |    0.000000 |  1.000000 |               0.6000000 |           0.0000000 |             0.1764706 |         0.4689119 |               4.475000 |                     0.0294118 |
+| Median  |       7.00000 |               0.3604167 |    0.000000 |  1.000000 |               0.8000000 |           0.1500000 |             0.2692308 |         0.5442804 |               4.648230 |                     0.0393228 |
+| Mean    |       7.27907 |               0.3537985 |    1.380127 |  4.673573 |               0.7582498 |           0.2890607 |             0.2785470 |         0.5264764 |               4.506621 |                     0.0397244 |
+| 3rd Qu. |       9.00000 |               0.4121212 |    1.000000 |  5.000000 |               1.0000000 |           0.5000000 |             0.3684211 |         0.6075949 |               4.830467 |                     0.0503979 |
+| Max.    |      10.00000 |               0.8666667 |   74.000000 | 93.000000 |               1.0000000 |           1.0000000 |             1.0000000 |         0.9000000 |               5.971660 |                     0.1194539 |
+
+The function is called for the `shares` below 1400.
+
+``` r
+TrainStatSum("below 1400")
+```
+
+|         | num\_keywords | avg\_positive\_polarity | num\_videos | num\_imgs | max\_positive\_polarity | title\_subjectivity | rate\_negative\_words | n\_unique\_tokens | average\_token\_length | global\_rate\_positive\_words |
+| ------- | ------------: | ----------------------: | ----------: | --------: | ----------------------: | ------------------: | --------------------: | ----------------: | ---------------------: | ----------------------------: |
+| Min.    |      1.000000 |               0.0000000 |    0.000000 |  0.000000 |               0.0000000 |           0.0000000 |             0.0000000 |         0.0000000 |               0.000000 |                     0.0000000 |
+| 1st Qu. |      6.000000 |               0.3038841 |    0.000000 |  1.000000 |               0.6000000 |           0.0000000 |             0.2000000 |         0.4783505 |               4.476431 |                     0.0271186 |
+| Median  |      7.000000 |               0.3565605 |    0.000000 |  1.000000 |               0.8000000 |           0.1000000 |             0.3000000 |         0.5413712 |               4.663551 |                     0.0373057 |
+| Mean    |      7.023509 |               0.3542173 |    1.353505 |  4.081846 |               0.7557345 |           0.2646893 |             0.3037970 |         0.5353332 |               4.565993 |                     0.0382616 |
+| 3rd Qu. |      8.000000 |               0.4121212 |    1.000000 |  2.000000 |               1.0000000 |           0.5000000 |             0.4029851 |         0.6100796 |               4.852632 |                     0.0487805 |
+| Max.    |     10.000000 |               1.0000000 |   50.000000 | 91.000000 |               1.0000000 |           1.0000000 |             0.9402985 |         1.0000000 |               6.512690 |                     0.1213873 |
+
 # Modeling
 
 This section will fit two types of models to predict the `shares`
-variable. One model is an ensemble model and the other model is a
-multiple linear regression model. The training data set was used to fit
-the two models and the test data set was used to make predictions.
+variable.The first section discusses a an ensemble model and the second
+section discusses the selection of a linear regression model from a
+collection of linear regression models. The training data set was used
+to fit the two models and the test data set was used to make
+predictions.
 
 ## Ensemble Model: Bagged Tree
 
@@ -301,12 +354,13 @@ model from a collection of linear regression models. Correlations of
 numeric predictor variables with each other and with the response
 variable `shares` were used to create the collection of variables.
 Predictor variables with lower correlations with each other and the
-`shares` variable were used because higher correlations can interfere
+`shares` variable were used because higher correlations may interfere
 with model performance.
 
-The figure below shows a correlation plot of the correlations between
-the predictor variables in the training data set. The `cor` function was
-used from the `corrplot` library.
+The figure below shows a correlation plot of the correlations between a
+subset of predictor variables from the full data set that were in the
+training data set. The `cor` function was used from the `corrplot`
+library.
 
 ``` r
 correlation <- cor(weekdayDataTrain %>% select(num_keywords, avg_positive_polarity, num_videos, num_imgs, 
@@ -319,9 +373,11 @@ corrplot(correlation, type = "lower", method = "number", add = TRUE, tl.pos = "n
 
 ![](READMEtemplate_files/figure-gfm/correlation-1.png)<!-- -->
 
-Next, two simple linear regression models and three multiple linear
-regression models were selected. The `lm` function was used to find the
-best fit.
+Linear regression models can be formed based on the predictor variables
+with lower correlations. In this example, two simple linear regression
+models and three multiple linear regression models were selected based
+on variables with lower correlations. The `lm` function was used to fit
+the models with the training data set.
 
 ``` r
 mlrFit1 <- lm(shares ~ num_keywords + num_imgs, data = weekdayDataTrain)
@@ -380,20 +436,22 @@ fitStats
     ## 2          AIC 101745.11589 101745.3840 101747.63918 101747.16981 101747.01868
     ## 3          BIC 101770.90469 101764.7256 101779.87518 101772.95861 101766.36028
 
-Root mean square error (RMSE) for the training data set and the testing
-data set are also used to select the best model. The `predict` function
-was used to make a prediction and the `RMSE` function was used to
-calculate the RMSE.
-
-``` r
-mlrFit1_predTrain <- predict(mlrFit1, newdata = weekdayDataTrain)
-RMSE(weekdayDataTrain$shares, mlrFit1_predTrain)
-```
-
-    ## [1] 13258.29
+For this example the first linear regression model was selected to
+demonstrate predicting with test data and calculating the root mean
+square error (RMSE). RMSE for the testing data set are also used to
+select the best model. The `predict` function was used to make a
+prediction and the `RMSE` function was used to calculate the RMSE.
 
 ``` r
 mlrFit1_predTest <- predict(mlrFit1, newdata = weekdayDataTest)
+
+head(mlrFit1_predTest)
+```
+
+    ##        1        2        3        4        5        6 
+    ## 3121.389 4190.073 4441.841 3462.671 3247.273 3624.925
+
+``` r
 RMSE(weekdayDataTest$shares, mlrFit1_predTest)
 ```
 
