@@ -1,4 +1,4 @@
-ST558 Project 2
+Thursday Analysis
 ================
 Noel Hilliard
 July 3, 2020
