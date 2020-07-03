@@ -5,7 +5,7 @@ July 3, 2020
 
   - [Introduction Online News Popularity
     Data](#introduction-online-news-popularity-data)
-  - [Monday Data](#monday-data)
+  - [monday Data](#monday-data)
   - [Summary Statistics](#summary-statistics)
       - [Histogram](#histogram)
       - [Bar Graph](#bar-graph)
@@ -50,7 +50,7 @@ library(knitr)
 library(caret)
 ```
 
-# Monday Data
+# monday Data
 
 The full data set contained data for all days of the week. This analysis
 will focus on the data from monday. Once the data was filtered for
@@ -257,9 +257,9 @@ the two models and the test data set was used to make predictions.
 The `caret` package was used to fit the bagged tree model. Repeated
 cross validation was used in the `trainControl` function. This result
 was fed into the `train` function with the method specified as `treebag`
-for a bagged tree model. The predictors were centered and scaled in the
-`preProcess` argument. This method does not have any tuning parameters.
-The best model fit is shown below.
+for a bagged tree model to train the tree on the sample. The predictors
+were centered and scaled in the `preProcess` argument. This method does
+not have any tuning parameters. The best model fit is shown below.
 
 ``` r
 set.seed(1)
@@ -352,6 +352,9 @@ bag_misClass
     ## [1] 0.4847424
 
 ## Select Best Multiple Linear Regression Model
+
+In this section, the best multiple linear regression model fit is
+selected based on AIC and adjusted R squared.
 
 ``` r
 mlrFit1 <- lm(shares ~ num_keywords + avg_positive_polarity + 
