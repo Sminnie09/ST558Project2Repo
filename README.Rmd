@@ -30,7 +30,7 @@ params <- lapply(days, FUN = function(x){list(day = x)})
 reports <- tibble(filename = output_file, params)
 ```
 
-```{r , eval = TRUE, echo = FALSE}
+```{r , eval = TRUE, echo = FALSE, message = FALSE}
 apply(reports, MARGIN = 1, FUN = function(x){
   render("READMEtemplate.Rmd", 
          output_file = x[[1]], params = x[[2]])
