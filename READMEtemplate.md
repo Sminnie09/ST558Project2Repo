@@ -337,7 +337,45 @@ bag_tbl
     ##   above 1400        547        490
     ##   below 1400        479        483
 
-The misclassification rate for the bagged tree model is shown below.
+A confusion matrix is below to measure model accuracy for the test data.
+The model is considered usedful if the accuracy (1-misClass) is greater
+than the no information rate.
+
+``` r
+confusionMatrix(bag_pred, weekdayDataTest$shares_group)
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##             Reference
+    ## Prediction   above 1400 below 1400
+    ##   above 1400        547        490
+    ##   below 1400        479        483
+    ##                                           
+    ##                Accuracy : 0.5153          
+    ##                  95% CI : (0.4931, 0.5374)
+    ##     No Information Rate : 0.5133          
+    ##     P-Value [Acc > NIR] : 0.4379          
+    ##                                           
+    ##                   Kappa : 0.0295          
+    ##                                           
+    ##  Mcnemar's Test P-Value : 0.7480          
+    ##                                           
+    ##             Sensitivity : 0.5331          
+    ##             Specificity : 0.4964          
+    ##          Pos Pred Value : 0.5275          
+    ##          Neg Pred Value : 0.5021          
+    ##              Prevalence : 0.5133          
+    ##          Detection Rate : 0.2736          
+    ##    Detection Prevalence : 0.5188          
+    ##       Balanced Accuracy : 0.5148          
+    ##                                           
+    ##        'Positive' Class : above 1400      
+    ## 
+
+The misclassification rate for the bagged tree model is shown below. A
+lower misclassification rate demonstrates better accuracy in
+predictions.
 
 ``` r
 bag_misClass <- 1 - sum(diag(bag_tbl))/sum(bag_tbl)

@@ -6,6 +6,7 @@ July 3, 2020
   - [Introduction Online News Popularity
     Data](#introduction-online-news-popularity-data)
   - [Analysis](#analysis)
+  - [Conclusions](#conclusions)
 
 Project Objective: The goal is to create models for predicting the
 `shares` variable from the dataset. You will create two models: a linear
@@ -71,8 +72,7 @@ The full data set contained data for all days of the week.
 
   - The analysis for [Tuesday is available here.](TuesdayAnalysis.md)
 
-  - The analysis for [Wednesday is available
-    here.](WednesdayAnalysis.md)
+  - The analysis for [Wednesday is available here.](WednesdayAnalysis.md)
 
   - The analysis for [Thursday is available here.](ThursdayAnalysis.md)
 
@@ -81,3 +81,20 @@ The full data set contained data for all days of the week.
   - The analysis for [Saturday is available here.](SaturdayAnalysis.md)
 
   - The analysis for [Sunday is available here.](SundayAnalysis.md)
+
+# Conclusions
+
+Based on the analysis, the bagged tree model performed better on the
+weekend data because the misclassification rate was about 30% and 40%.
+This means that 60-70% of the time the model selected the correct
+`shares` group. The bagged tree model did not perform as well as on the
+Monday-Friday data because the misclassification rate was around 50%.
+Based on the correlation plot used to select the variables for the
+collection of linear regression models, the subset of variables do not
+have much impact on the `shares` variable because the correlations were
+low. Another conclusion based on the analysis is there are more shares
+on the weekends because there was signifcantly more counts in the “above
+1400” group on Saturday and Sunday compared to the week days. Lastly, it
+can be concluded from the linear regression selection that both fit
+stats and prediction error are needed to select a model because
+sometimes the adjusted R square and AIC/BIC values do not agree.

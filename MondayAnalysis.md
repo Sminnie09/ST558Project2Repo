@@ -183,7 +183,7 @@ table(weekdayDataTrain$shares_group)
     ##       2365       2297
 
 This is a summary of the `shares` variable in the training data set
-which inlcudes: minimum, 1st quartile, median, mean, 3rd quartile, and
+which includes: minimum, 1st quartile, median, mean, 3rd quartile, and
 maximum.
 
 ``` r
@@ -242,7 +242,7 @@ TrainStatSum("below 1400")
 # Modeling
 
 This section will fit two types of models to predict the `shares`
-variable.The first section discusses a an ensemble model and the second
+variable.The first section discusses an ensemble model and the second
 section discusses the selection of a linear regression model from a
 collection of linear regression models. The training data set was used
 to fit the two models and the test data set was used to make
@@ -337,7 +337,45 @@ bag_tbl
     ##   above 1400        547        490
     ##   below 1400        479        483
 
-The misclassification rate for the bagged tree model is shown below.
+A confusion matrix is below to measure model accuracy for the test data.
+The model is considered useful if the accuracy (1-misClass) is greater
+than the no information rate.
+
+``` r
+confusionMatrix(bag_pred, weekdayDataTest$shares_group)
+```
+
+    ## Confusion Matrix and Statistics
+    ## 
+    ##             Reference
+    ## Prediction   above 1400 below 1400
+    ##   above 1400        547        490
+    ##   below 1400        479        483
+    ##                                           
+    ##                Accuracy : 0.5153          
+    ##                  95% CI : (0.4931, 0.5374)
+    ##     No Information Rate : 0.5133          
+    ##     P-Value [Acc > NIR] : 0.4379          
+    ##                                           
+    ##                   Kappa : 0.0295          
+    ##                                           
+    ##  Mcnemar's Test P-Value : 0.7480          
+    ##                                           
+    ##             Sensitivity : 0.5331          
+    ##             Specificity : 0.4964          
+    ##          Pos Pred Value : 0.5275          
+    ##          Neg Pred Value : 0.5021          
+    ##              Prevalence : 0.5133          
+    ##          Detection Rate : 0.2736          
+    ##    Detection Prevalence : 0.5188          
+    ##       Balanced Accuracy : 0.5148          
+    ##                                           
+    ##        'Positive' Class : above 1400      
+    ## 
+
+The misclassification rate for the bagged tree model is shown below. A
+lower misclassification rate demonstrates better accuracy in
+predictions.
 
 ``` r
 bag_misClass <- 1 - sum(diag(bag_tbl))/sum(bag_tbl)
@@ -438,7 +476,7 @@ fitStats
 
 For this example the first linear regression model was selected to
 demonstrate predicting with test data and calculating the root mean
-square error (RMSE). RMSE for the testing data set are also used to
+square error (RMSE). RMSE for the testing data set is also used to
 select the best model. The `predict` function was used to make a
 prediction and the `RMSE` function was used to calculate the RMSE.
 
