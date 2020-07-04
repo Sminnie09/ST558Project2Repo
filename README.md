@@ -61,7 +61,7 @@ from the data set. Two types of methods will be used to predict the
 analysis, the `shares` were divided into two groups (\< 1400 and \>=
 1400) to create a binary classification problem. The second model
 discussed is linear regression. Both types of models were trained/tuned
-using the training data set and then then predictions were made using
+using the training data set and then predictions were made using
 the test data set.
 
 # Analysis
